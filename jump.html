@@ -104,11 +104,11 @@
 
         #ad-text {
             white-space: nowrap;
-            animation: scroll 10s linear infinite; /* Бегущая строка */
+            animation: scroll 10s linear infinite;
             font-family: Arial, sans-serif;
             font-size: 14px;
             color: black;
-            padding-left: 400px; /* Начало за пределами экрана */
+            padding-left: 400px;
         }
 
         @keyframes scroll {
@@ -123,7 +123,7 @@
             transform: translateX(-50%);
             display: flex;
             justify-content: space-between;
-            width: 200px; /* Уменьшили ширину без кнопки прыжка */
+            width: 200px;
             z-index: 10;
         }
 
@@ -278,7 +278,7 @@
         function addNewPlatform() {
             const newPlatform = document.createElement('div');
             newPlatform.classList.add('platform');
-            const randomX = Math.floor(Math.random() * (game.offsetHeight - 100));
+            const randomX = Math.floor(Math.random() * (game.offsetWidth - 100));
             const newBottom = highestPlatformBottom + 100;
             const newLevel = parseInt(document.querySelector('.platform:last-child').dataset.level) + 1;
             newPlatform.style.left = randomX + 'px';
@@ -357,7 +357,8 @@
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
-                    velocity <= 0
+                    velocity <= 0 && // Приземление только при падении
+                    Math.abs(playerBottom - (platformBottom + 20)) < 2 // Точная проверка приземления
                 ) {
                     if (
                         playerLeft + playerWidth > platformLeft &&
@@ -393,9 +394,8 @@
                 onPlatform = false;
                 currentScore = 0;
                 currentScoreDisplay.textContent = currentScore;
-            } else if (playerBottom >= maxHeight) { // Сброс, если слишком высоко
-                playerBottom = maxHeight;
-                velocity = -jumpForce / 2; // Легкий возврат вниз
+            } else if (playerBottom >= maxHeight) {
+                velocity = -jumpForce / 2; // Возвращаем вниз
                 isJumping = true;
                 player.classList.add('jumping');
             }
