@@ -170,38 +170,24 @@
             Telegram.WebApp.expand();
         }
 
-        // Фокус для клавиш на ПК
-        window.addEventListener('load', () => {
-            game.focus();
-        });
-
-        game.addEventListener('click', () => {
-            game.focus();
-        });
+        window.addEventListener('load', () => game.focus());
+        game.addEventListener('click', () => game.focus());
 
         // Управление клавишами
         game.addEventListener('keydown', (e) => {
             e.preventDefault();
-            if ((e.code === 'Space' || e.code === 'ArrowUp') && !isJumping) {
-                jump();
-            }
-            if (e.code === 'ArrowLeft') {
-                horizontalVelocity = -moveSpeed;
-            }
-            if (e.code === 'ArrowRight') {
-                horizontalVelocity = moveSpeed;
-            }
+            if ((e.code === 'Space' || e.code === 'ArrowUp') && !isJumping) jump();
+            if (e.code === 'ArrowLeft') horizontalVelocity = -moveSpeed;
+            if (e.code === 'ArrowRight') horizontalVelocity = moveSpeed;
         });
 
         game.addEventListener('keyup', (e) => {
             e.preventDefault();
-            if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-                horizontalVelocity = 0; // Сбрасываем скорость при отпускании
-            }
+            if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') horizontalVelocity = 0;
         });
 
         // Управление кнопками
-        function handleButtonStart(btn, action) {
+        function handleButtonStart(btn) {
             btn.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 btn.classList.add('active');
@@ -211,16 +197,14 @@
             });
             btn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                if (e.touches.length === 1) { // Фильтр ложных касаний
-                    btn.classList.add('active');
-                    if (btn.id === 'left-btn') horizontalVelocity = -moveSpeed;
-                    if (btn.id === 'right-btn') horizontalVelocity = moveSpeed;
-                    if (btn.id === 'jump-btn' && !isJumping) jump();
-                }
+                btn.classList.add('active');
+                if (btn.id === 'left-btn') horizontalVelocity = -moveSpeed;
+                if (btn.id === 'right-btn') horizontalVelocity = moveSpeed;
+                if (btn.id === 'jump-btn' && !isJumping) jump();
             });
         }
 
-        function handleButtonEnd(btn, action) {
+        function handleButtonEnd(btn) {
             btn.addEventListener('mouseup', () => {
                 btn.classList.remove('active');
                 if (btn.id === 'left-btn' || btn.id === 'right-btn') horizontalVelocity = 0;
@@ -237,12 +221,12 @@
             });
         }
 
-        handleButtonStart(leftBtn, () => {});
-        handleButtonEnd(leftBtn, () => {});
-        handleButtonStart(rightBtn, () => {});
-        handleButtonEnd(rightBtn, () => {});
-        handleButtonStart(jumpBtn, () => { if (!isJumping) jump(); });
-        handleButtonEnd(jumpBtn, () => {});
+        handleButtonStart(leftBtn);
+        handleButtonEnd(leftBtn);
+        handleButtonStart(rightBtn);
+        handleButtonEnd(rightBtn);
+        handleButtonStart(jumpBtn);
+        handleButtonEnd(jumpBtn);
 
         function jump() {
             if (!isJumping) {
@@ -330,7 +314,7 @@
 
                 if (platform.classList.contains('moving-left') || platform.classList.contains('moving-right')) {
                     const computedLeft = parseInt(getComputedStyle(platform).left);
-                    platformVelocity = computedLeft - platformLeft; // Движение платформы
+                    platformVelocity = computedLeft - platformLeft;
                     platformLeft = computedLeft;
                 } else {
                     platformVelocity = 0;
@@ -376,7 +360,6 @@
                 currentScoreDisplay.textContent = currentScore;
             }
 
-            // Комбинируем движение платформы и управления
             playerLeft += (onPlatform ? platformVelocity : 0) + horizontalVelocity;
 
             if (playerLeft <= 0) playerLeft = 0;
