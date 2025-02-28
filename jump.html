@@ -330,7 +330,7 @@
 
                 if (platform.classList.contains('moving-left') || platform.classList.contains('moving-right')) {
                     const computedLeft = parseInt(getComputedStyle(platform).left);
-                    platformVelocity = computedLeft - platformLeft;
+                    platformVelocity = computedLeft - platformLeft; // Движение платформы
                     platformLeft = computedLeft;
                 } else {
                     platformVelocity = 0;
@@ -376,7 +376,8 @@
                 currentScoreDisplay.textContent = currentScore;
             }
 
-            playerLeft += onPlatform ? platformVelocity : horizontalVelocity;
+            // Комбинируем движение платформы и управления
+            playerLeft += (onPlatform ? platformVelocity : 0) + horizontalVelocity;
 
             if (playerLeft <= 0) playerLeft = 0;
             if (playerLeft >= game.offsetWidth - 40) playerLeft = game.offsetWidth - 40;
