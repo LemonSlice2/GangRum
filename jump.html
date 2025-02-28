@@ -182,6 +182,7 @@
         // Управление клавишами
         game.addEventListener('keydown', (e) => {
             e.preventDefault();
+            console.log('Key pressed:', e.code); // Отладка клавиш
             if ((e.code === 'Space' || e.code === 'ArrowUp') && !isJumping) {
                 jump();
             }
@@ -195,6 +196,7 @@
 
         game.addEventListener('keyup', (e) => {
             e.preventDefault();
+            console.log('Key released:', e.code); // Отладка отпускания
             if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
                 horizontalVelocity = 0;
             }
@@ -204,11 +206,13 @@
         function handleButtonStart(btn, action) {
             btn.addEventListener('mousedown', (e) => {
                 e.preventDefault();
+                console.log('Button pressed:', btn.id); // Отладка нажатия
                 btn.classList.add('active');
                 action();
             });
             btn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
+                console.log('Touch start on:', btn.id); // Отладка сенсора
                 btn.classList.add('active');
                 action();
             });
@@ -216,16 +220,19 @@
 
         function handleButtonEnd(btn, action) {
             btn.addEventListener('mouseup', () => {
+                console.log('Button released:', btn.id); // Отладка отпускания
                 btn.classList.remove('active');
                 action();
             });
             btn.addEventListener('touchend', (e) => {
                 e.preventDefault();
+                console.log('Touch end on:', btn.id); // Отладка сенсора
                 btn.classList.remove('active');
                 action();
             });
             btn.addEventListener('touchcancel', (e) => {
                 e.preventDefault();
+                console.log('Touch cancelled on:', btn.id); // Отладка сброса
                 btn.classList.remove('active');
                 action();
             });
@@ -245,6 +252,7 @@
                 isJumping = true;
                 velocity = jumpForce;
                 player.classList.add('jumping');
+                console.log('Jump triggered, velocity:', velocity); // Отладка прыжка
             }
         }
 
@@ -335,7 +343,7 @@
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
-                    velocity < 0
+                    velocity <= 0
                 ) {
                     if (
                         playerLeft + playerWidth > platformLeft &&
