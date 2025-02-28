@@ -18,7 +18,7 @@
         #game-container {
             position: relative;
             width: 400px;
-            height: 700px;
+            height: 600px; /* Убираем лишнюю высоту */
         }
 
         #game {
@@ -91,24 +91,16 @@
             z-index: 10;
         }
 
-        #controls {
-            position: absolute;
-            top: 620px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            justify-content: center;
-            width: 300px;
-            z-index: 10;
-        }
-
         #joystick {
             width: 100px;
             height: 100px;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 50%;
-            position: relative;
+            position: absolute;
+            bottom: 20px; /* Внутри экрана, снизу */
+            right: 20px;  /* Справа */
             touch-action: none;
+            z-index: 10;
         }
 
         #stick {
@@ -134,8 +126,6 @@
             <div class="platform visible" style="bottom: 100px; left: 150px; background: yellow;" data-level="1"></div>
             <div class="platform visible" style="bottom: 200px; left: 50px; background: yellow;" data-level="2"></div>
             <div class="platform visible" style="bottom: 300px; left: 250px; background: yellow;" data-level="3"></div>
-        </div>
-        <div id="controls">
             <div id="joystick">
                 <div id="stick"></div>
             </div>
@@ -202,13 +192,12 @@
 
         // Джойстик
         let isDragging = false;
-        let joystickCenterX, joystickCenterY;
+        let joystickRect;
 
         joystick.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
-            joystickCenterX = joystick.offsetLeft + joystick.offsetWidth / 2;
-            joystickCenterY = joystick.offsetTop + joystick.offsetHeight / 2;
+            joystickRect = joystick.getBoundingClientRect();
             isDragging = true;
             updateStickPosition(touch);
         });
@@ -230,6 +219,8 @@
         });
 
         function updateStickPosition(touch) {
+            const joystickCenterX = joystickRect.left + joystickRect.width / 2;
+            const joystickCenterY = joystickRect.top + joystickRect.height / 2;
             let dx = touch.clientX - joystickCenterX;
             let dy = touch.clientY - joystickCenterY;
             const distance = Math.sqrt(dx * dx + dy * dy);
