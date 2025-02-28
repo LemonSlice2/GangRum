@@ -170,73 +170,76 @@
 
         game.addEventListener('keydown', (e) => {
             e.preventDefault();
-            if ((e.code === 'Space' || e.code === 'ArrowUp') && !isJumping) jump();
-            if (e.code === 'ArrowLeft') horizontalVelocity = -moveSpeed;
-            if (e.code === 'ArrowRight') horizontalVelocity = moveSpeed;
+            if ((e.code === 'Space' || e.code === 'ArrowUp') && !isJumping) {
+                jump();
+            }
+            if (e.code === 'ArrowLeft') {
+                horizontalVelocity = -moveSpeed;
+                leftBtn.classList.add('active');
+            }
+            if (e.code === 'ArrowRight') {
+                horizontalVelocity = moveSpeed;
+                rightBtn.classList.add('active');
+            }
         });
 
         game.addEventListener('keyup', (e) => {
             e.preventDefault();
-            if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') horizontalVelocity = 0;
+            if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+                horizontalVelocity = 0;
+                leftBtn.classList.remove('active');
+                rightBtn.classList.remove('active');
+            }
         });
 
-        leftBtn.addEventListener('mousedown', () => {
-            horizontalVelocity = -moveSpeed;
-            leftBtn.classList.add('active');
-        });
-        leftBtn.addEventListener('mouseup', () => {
-            horizontalVelocity = 0;
-            leftBtn.classList.remove('active');
-        });
+        function handleButtonStart(btn, action) {
+            btn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                btn.classList.add('active');
+                action();
+                game.focus();
+            });
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                btn.classList.add('active');
+                action();
+                game.focus();
+            });
+        }
 
-        rightBtn.addEventListener('mousedown', () => {
-            horizontalVelocity = moveSpeed;
-            rightBtn.classList.add('active');
-        });
-        rightBtn.addEventListener('mouseup', () => {
-            horizontalVelocity = 0;
-            rightBtn.classList.remove('active');
-        });
+        function handleButtonEnd(btn, action) {
+            btn.addEventListener('mouseup', () => {
+                btn.classList.remove('active');
+                action();
+            });
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                btn.classList.remove('active');
+                action();
+            });
+            btn.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                btn.classList.remove('active');
+                action();
+            });
+        }
 
-        jumpBtn.addEventListener('mousedown', () => {
-            if (!isJumping) jump();
-            jumpBtn.classList.add('active');
-        });
-        jumpBtn.addEventListener('mouseup', () => {
-            jumpBtn.classList.remove('active');
-        });
+        handleButtonStart(leftBtn, () => horizontalVelocity = -moveSpeed);
+        handleButtonEnd(leftBtn, () => horizontalVelocity = 0);
 
-        leftBtn.addEventListener('touchstart', () => {
-            horizontalVelocity = -moveSpeed;
-            leftBtn.classList.add('active');
-        });
-        leftBtn.addEventListener('touchend', () => {
-            horizontalVelocity = 0;
-            leftBtn.classList.remove('active');
-        });
+        handleButtonStart(rightBtn, () => horizontalVelocity = moveSpeed);
+        handleButtonEnd(rightBtn, () => horizontalVelocity = 0);
 
-        rightBtn.addEventListener('touchstart', () => {
-            horizontalVelocity = moveSpeed;
-            rightBtn.classList.add('active');
-        });
-        rightBtn.addEventListener('touchend', () => {
-            horizontalVelocity = 0;
-            rightBtn.classList.remove('active');
-        });
-
-        jumpBtn.addEventListener('touchstart', () => {
-            if (!isJumping) jump();
-            jumpBtn.classList.add('active');
-        });
-        jumpBtn.addEventListener('touchend', () => {
-            jumpBtn.classList.remove('active');
-        });
+        handleButtonStart(jumpBtn, () => { if (!isJumping) jump(); });
+        handleButtonEnd(jumpBtn, () => {});
 
         function jump() {
             if (!isJumping) {
                 isJumping = true;
                 velocity = jumpForce;
                 player.classList.add('jumping');
+                jumpBtn.classList.add('active');
+                setTimeout(() => jumpBtn.classList.remove('active'), 100);
             }
         }
 
@@ -310,19 +313,21 @@
             const platforms = document.querySelectorAll('.platform');
             platforms.forEach(platform => {
                 let platformBottom = parseInt(platform.style.bottom);
-                let platformLeft = parseInt(platform.style.left);
+                let platformLeft = parseInt(platform.style.left); // Используем начальную позицию
                 const playerWidth = 40;
                 const platformWidth = 100;
 
-                // Исправленная проверка коллизии
+                // Проверка коллизии с учётом движения платформы
                 if (
                     playerBottom <= platformBottom + 20 &&
-                    playerBottom + velocity >= platformBottom - 1 && // Учитываем небольшую погрешность
+                    playerBottom + velocity >= platformBottom &&
                     velocity < 0
                 ) {
+                    // Расширяем зону коллизии для движущихся платформ
+                    let currentPlatformLeft = parseInt(getComputedStyle(platform).left);
                     if (
-                        playerLeft + playerWidth > platformLeft &&
-                        playerLeft < platformLeft + platformWidth
+                        playerLeft + playerWidth > currentPlatformLeft &&
+                        playerLeft < currentPlatformLeft + platformWidth
                     ) {
                         playerBottom = platformBottom + 20;
                         velocity = 0;
