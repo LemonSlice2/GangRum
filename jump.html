@@ -39,7 +39,7 @@
             position: absolute;
             left: 180px;
             bottom: 0;
-            transition: left 0.1s; /* Убрали transition для bottom */
+            transition: left 0.1s;
         }
         
         #player.jumping {
@@ -143,8 +143,7 @@
         let playerLeft = 180;
         let velocity = 0;
         let horizontalVelocity = 0;
-        let isJumping = false;
-        const gravity = 0.8; // Увеличили гравитацию для частых прыжков
+        const gravity = 0.8;
         const jumpForce = 12;
         const maxSpeed = 5;
         let highestPlatformBottom = 300;
@@ -163,6 +162,7 @@
         // Фокус для клавиш на ПК
         window.addEventListener('load', () => {
             game.focus();
+            jump(); // Начинаем прыжки сразу
         });
 
         game.addEventListener('click', () => {
@@ -227,7 +227,7 @@
             }
 
             stick.style.left = `calc(50% + ${dx}px)`;
-            stick.style.top = '50%'; // Джойстик только горизонтальный
+            stick.style.top = '50%';
 
             horizontalVelocity = (dx / maxDistance) * maxSpeed;
         }
@@ -235,7 +235,6 @@
         function jump() {
             velocity = jumpForce;
             player.classList.add('jumping');
-            isJumping = true;
         }
 
         function getPlatformColor(level) {
@@ -304,16 +303,7 @@
             velocity -= gravity;
             playerBottom += velocity;
 
-            // Автоматический прыжок при приземлении
-            if (playerBottom <= 0) {
-                playerBottom = 0;
-                velocity = 0;
-                jump(); // Сразу прыгаем снова
-                currentScore = 0;
-                currentScoreDisplay.textContent = currentScore;
-            }
-
-            let platformVelocity = 0; // Скорость платформы
+            let platformVelocity = 0;
             let onMovingPlatform = false;
 
             const platforms = document.querySelectorAll('.platform');
@@ -325,7 +315,7 @@
 
                 if (platform.classList.contains('moving-left') || platform.classList.contains('moving-right')) {
                     const computedLeft = parseInt(getComputedStyle(platform).left);
-                    platformVelocity = computedLeft - platformLeft; // Разница позиции платформы
+                    platformVelocity = computedLeft - platformLeft;
                     platformLeft = computedLeft;
                 } else {
                     platformVelocity = 0;
@@ -342,7 +332,7 @@
                     ) {
                         playerBottom = platformBottom + 20;
                         velocity = 0;
-                        jump(); // Прыгаем снова после приземления
+                        jump(); // Прыгаем снова
                         onMovingPlatform = true;
 
                         if (platform.dataset.counted === 'false') {
@@ -360,7 +350,14 @@
                 }
             });
 
-            // Движение вместе с платформой
+            if (playerBottom <= 0) {
+                playerBottom = 0;
+                velocity = 0;
+                jump(); // Прыгаем с пола
+                currentScore = 0;
+                currentScoreDisplay.textContent = currentScore;
+            }
+
             if (onMovingPlatform) {
                 playerLeft += platformVelocity;
             } else {
