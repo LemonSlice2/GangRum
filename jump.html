@@ -193,10 +193,12 @@
             });
             btn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                btn.classList.add('active');
-                if (btn.id === 'left-btn') horizontalVelocity = -moveSpeed;
-                if (btn.id === 'right-btn') horizontalVelocity = moveSpeed;
-                if (btn.id === 'jump-btn' && !isJumping) jump();
+                if (e.touches.length === 1) { // Фильтр для одиночных касаний
+                    btn.classList.add('active');
+                    if (btn.id === 'left-btn') horizontalVelocity = -moveSpeed;
+                    if (btn.id === 'right-btn') horizontalVelocity = moveSpeed;
+                    if (btn.id === 'jump-btn' && !isJumping) jump();
+                }
             });
         }
 
