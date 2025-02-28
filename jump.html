@@ -265,6 +265,7 @@
                 } else {
                     if (Math.random() < 0.3) newPlatform.classList.add(moveDirection);
                 }
+                newPlatform.style.position = 'absolute';
             }
             game.appendChild(newPlatform);
             setTimeout(() => newPlatform.classList.add('visible'), 10);
@@ -310,18 +311,19 @@
             const platforms = document.querySelectorAll('.platform');
             platforms.forEach(platform => {
                 let platformBottom = parseInt(platform.style.bottom);
-                let platformLeft = parseInt(platform.style.left);
+                let platformLeft = parseInt(getComputedStyle(platform).left); // Используем реальную позицию
                 const playerWidth = 40;
                 const platformWidth = 100;
 
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
-                    velocity < 0
+                    velocity < 0 &&
+                    Math.abs(playerBottom + velocity - platformBottom) < 2
                 ) {
                     if (
-                        playerLeft + playerWidth > platformLeft &&
-                        playerLeft < platformLeft + platformWidth
+                        playerLeft + playerWidth > parseInt(getComputedStyle(platform).left) &&
+                        playerLeft < parseInt(getComputedStyle(platform).left) + platformWidth
                     ) {
                         playerBottom = platformBottom + 20;
                         velocity = 0;
