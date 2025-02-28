@@ -353,12 +353,12 @@
                     platformVelocity = 0;
                 }
 
-                // Точное приземление с учетом следующего шага
+                // Точное приземление
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
                     velocity < 0 &&
-                    Math.abs(playerBottom + velocity - platformBottom) < 10
+                    Math.abs(playerBottom - (platformBottom + 20)) < 10 // Проверка после движения
                 ) {
                     if (
                         playerLeft + playerWidth > platformLeft &&
@@ -385,7 +385,7 @@
                 }
             });
 
-            // Ограничение высоты и принудительное падение
+            // Ограничение высоты
             if (playerBottom <= 0) {
                 playerBottom = 0;
                 velocity = jumpForce; // Прыжок с пола
