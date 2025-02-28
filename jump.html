@@ -18,7 +18,7 @@
         #game-container {
             position: relative;
             width: 400px;
-            height: 600px;
+            height: 700px; /* Для кнопок ниже */
         }
 
         #game {
@@ -39,7 +39,7 @@
             position: absolute;
             left: 180px;
             bottom: 0;
-            transition: left 0.1s; /* Только для горизонтали */
+            transition: bottom 0.1s, left 0.1s;
         }
         
         #player.jumping {
@@ -91,27 +91,34 @@
             z-index: 10;
         }
 
-        #joystick {
-            width: 100px;
-            height: 100px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 50%;
+        #controls {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            touch-action: none;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: space-between;
+            width: 300px;
             z-index: 10;
         }
 
-        #stick {
-            width: 40px;
-            height: 40px;
+        .control-btn {
+            width: 60px;
+            height: 60px;
             background: #333;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .control-btn.active {
+            background: #555;
         }
     </style>
 </head>
@@ -126,9 +133,11 @@
             <div class="platform visible" style="bottom: 100px; left: 150px; background: yellow;" data-level="1"></div>
             <div class="platform visible" style="bottom: 200px; left: 50px; background: yellow;" data-level="2"></div>
             <div class="platform visible" style="bottom: 300px; left: 250px; background: yellow;" data-level="3"></div>
-            <div id="joystick">
-                <div id="stick"></div>
-            </div>
+        </div>
+        <div id="controls">
+            <div class="control-btn" id="left-btn">←</div>
+            <div class="control-btn" id="jump-btn">↑</div>
+            <div class="control-btn" id="right-btn">→</div>
         </div>
     </div>
 
@@ -137,15 +146,17 @@
         const player = document.getElementById('player');
         const currentScoreDisplay = document.getElementById('current-score');
         const highScoreDisplay = document.getElementById('high-score');
-        const joystick = document.getElementById('joystick');
-        const stick = document.getElementById('stick');
+        const leftBtn = document.getElementById('left-btn');
+        const rightBtn = document.getElementById('right-btn');
+        const jumpBtn = document.getElementById('jump-btn');
         let playerBottom = 0;
         let playerLeft = 180;
         let velocity = 0;
         let horizontalVelocity = 0;
-        const gravity = 0.8;
+        let isJumping = false;
+        const gravity = 0.5;
         const jumpForce = 12;
-        const maxSpeed = 5;
+        const moveSpeed = 5;
         let highestPlatformBottom = 300;
         let currentScore = 0;
         let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
@@ -162,7 +173,6 @@
         // Фокус для клавиш на ПК
         window.addEventListener('load', () => {
             game.focus();
-            jump(); // Старт прыжков
         });
 
         game.addEventListener('click', () => {
@@ -172,11 +182,14 @@
         // Управление клавишами
         game.addEventListener('keydown', (e) => {
             e.preventDefault();
+            if ((e.code === 'Space' || e.code === 'ArrowUp') && !isJumping) {
+                jump();
+            }
             if (e.code === 'ArrowLeft') {
-                horizontalVelocity = -maxSpeed;
+                horizontalVelocity = -moveSpeed;
             }
             if (e.code === 'ArrowRight') {
-                horizontalVelocity = maxSpeed;
+                horizontalVelocity = moveSpeed;
             }
         });
 
@@ -187,54 +200,52 @@
             }
         });
 
-        // Джойстик
-        let isDragging = false;
-        let joystickRect;
-
-        joystick.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            joystickRect = joystick.getBoundingClientRect();
-            isDragging = true;
-            updateStickPosition(touch);
-        });
-
-        joystick.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (isDragging) {
-                const touch = e.touches[0];
-                updateStickPosition(touch);
-            }
-        });
-
-        joystick.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            isDragging = false;
-            stick.style.left = '50%';
-            stick.style.top = '50%';
-            horizontalVelocity = 0;
-        });
-
-        function updateStickPosition(touch) {
-            const joystickCenterX = joystickRect.left + joystickRect.width / 2;
-            let dx = touch.clientX - joystickCenterX;
-            const distance = Math.abs(dx);
-            const maxDistance = joystick.offsetWidth / 2 - stick.offsetWidth / 2;
-
-            if (distance > maxDistance) {
-                dx = (dx / distance) * maxDistance;
-            }
-
-            stick.style.left = `calc(50% + ${dx}px)`;
-            stick.style.top = '50%';
-
-            horizontalVelocity = (dx / maxDistance) * maxSpeed;
+        // Управление кнопками
+        function handleButtonStart(btn, action) {
+            btn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                btn.classList.add('active');
+                action();
+            });
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                btn.classList.add('active');
+                action();
+            });
         }
 
+        function handleButtonEnd(btn, action) {
+            btn.addEventListener('mouseup', () => {
+                btn.classList.remove('active');
+                action();
+            });
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                btn.classList.remove('active');
+                action();
+            });
+            btn.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                btn.classList.remove('active');
+                action();
+            });
+        }
+
+        handleButtonStart(leftBtn, () => horizontalVelocity = -moveSpeed);
+        handleButtonEnd(leftBtn, () => horizontalVelocity = 0);
+
+        handleButtonStart(rightBtn, () => horizontalVelocity = moveSpeed);
+        handleButtonEnd(rightBtn, () => horizontalVelocity = 0);
+
+        handleButtonStart(jumpBtn, () => { if (!isJumping) jump(); });
+        handleButtonEnd(jumpBtn, () => {});
+
         function jump() {
-            velocity = jumpForce;
-            player.classList.add('jumping');
-            console.log('Jump triggered, velocity:', velocity); // Отладка
+            if (!isJumping) {
+                isJumping = true;
+                velocity = jumpForce;
+                player.classList.add('jumping');
+            }
         }
 
         function getPlatformColor(level) {
@@ -300,11 +311,8 @@
         }
 
         function gameLoop() {
-            // Применяем гравитацию
             velocity -= gravity;
             playerBottom += velocity;
-
-            console.log('Velocity:', velocity, 'PlayerBottom:', playerBottom); // Отладка
 
             let platformVelocity = 0;
             let onPlatform = false;
@@ -335,7 +343,8 @@
                     ) {
                         playerBottom = platformBottom + 20;
                         velocity = 0;
-                        jump(); // Прыгаем снова
+                        isJumping = false;
+                        player.classList.remove('jumping');
                         onPlatform = true;
 
                         if (platform.dataset.counted === 'false') {
@@ -356,10 +365,11 @@
             if (playerBottom <= 0) {
                 playerBottom = 0;
                 velocity = 0;
-                jump(); // Прыгаем с пола
+                isJumping = false;
+                player.classList.remove('jumping');
+                onPlatform = false;
                 currentScore = 0;
                 currentScoreDisplay.textContent = currentScore;
-                onPlatform = false;
             }
 
             playerLeft += onPlatform ? platformVelocity : horizontalVelocity;
@@ -376,7 +386,6 @@
                 addNewPlatform();
             }
 
-            // Принудительно обновляем позицию
             player.style.bottom = playerBottom + 'px';
             player.style.left = playerLeft + 'px';
 
