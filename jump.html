@@ -39,7 +39,7 @@
             position: absolute;
             left: 180px;
             bottom: 0;
-            transition: left 0.1s;
+            transition: left 0.1s; /* Только для горизонтали */
         }
         
         #player.jumping {
@@ -162,7 +162,7 @@
         // Фокус для клавиш на ПК
         window.addEventListener('load', () => {
             game.focus();
-            jump(); // Начинаем прыжки сразу
+            jump(); // Старт прыжков
         });
 
         game.addEventListener('click', () => {
@@ -234,6 +234,7 @@
         function jump() {
             velocity = jumpForce;
             player.classList.add('jumping');
+            console.log('Jump triggered, velocity:', velocity); // Отладка
         }
 
         function getPlatformColor(level) {
@@ -299,8 +300,11 @@
         }
 
         function gameLoop() {
+            // Применяем гравитацию
             velocity -= gravity;
             playerBottom += velocity;
+
+            console.log('Velocity:', velocity, 'PlayerBottom:', playerBottom); // Отладка
 
             let platformVelocity = 0;
             let onPlatform = false;
@@ -323,7 +327,7 @@
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
-                    velocity <= 0 // Условие для приземления
+                    velocity <= 0
                 ) {
                     if (
                         playerLeft + playerWidth > platformLeft &&
@@ -331,7 +335,7 @@
                     ) {
                         playerBottom = platformBottom + 20;
                         velocity = 0;
-                        jump(); // Автоматический прыжок при приземлении
+                        jump(); // Прыгаем снова
                         onPlatform = true;
 
                         if (platform.dataset.counted === 'false') {
@@ -352,13 +356,12 @@
             if (playerBottom <= 0) {
                 playerBottom = 0;
                 velocity = 0;
-                jump(); // Автоматический прыжок с пола
+                jump(); // Прыгаем с пола
                 currentScore = 0;
                 currentScoreDisplay.textContent = currentScore;
                 onPlatform = false;
             }
 
-            // Движение с платформой или от игрока
             playerLeft += onPlatform ? platformVelocity : horizontalVelocity;
 
             if (playerLeft <= 0) playerLeft = 0;
@@ -373,6 +376,7 @@
                 addNewPlatform();
             }
 
+            // Принудительно обновляем позицию
             player.style.bottom = playerBottom + 'px';
             player.style.left = playerLeft + 'px';
 
