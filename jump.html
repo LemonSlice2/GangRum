@@ -191,12 +191,20 @@
             if (e.code === 'ArrowRight') {
                 horizontalVelocity = moveSpeed;
             }
+            // Поддержка одновременного нажатия
+            if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+                horizontalVelocity = (e.code === 'ArrowLeft' ? -moveSpeed : 0) + (e.code === 'ArrowRight' ? moveSpeed : 0);
+            }
         });
 
         game.addEventListener('keyup', (e) => {
             e.preventDefault();
             if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-                horizontalVelocity = 0;
+                // Пересчитываем скорость при отпускании
+                const keys = {};
+                document.addEventListener('keydown', (e) => keys[e.code] = true);
+                document.addEventListener('keyup', (e) => delete keys[e.code]);
+                horizontalVelocity = (keys['ArrowLeft'] ? -moveSpeed : 0) + (keys['ArrowRight'] ? moveSpeed : 0);
             }
         });
 
@@ -205,13 +213,17 @@
             btn.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 btn.classList.add('active');
-                action();
+                if (btn.id === 'left-btn') horizontalVelocity = -moveSpeed;
+                if (btn.id === 'right-btn') horizontalVelocity = moveSpeed;
+                if (btn.id === 'jump-btn' && !isJumping) jump();
             });
             btn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 if (e.touches.length === 1) { // Фильтр ложных касаний
                     btn.classList.add('active');
-                    action();
+                    if (btn.id === 'left-btn') horizontalVelocity = -moveSpeed;
+                    if (btn.id === 'right-btn') horizontalVelocity = moveSpeed;
+                    if (btn.id === 'jump-btn' && !isJumping) jump();
                 }
             });
         }
@@ -219,26 +231,46 @@
         function handleButtonEnd(btn, action) {
             btn.addEventListener('mouseup', () => {
                 btn.classList.remove('active');
-                action();
+                if (btn.id === 'left-btn' || btn.id === 'right-btn') {
+                    // Пересчитываем скорость
+                    const activeButtons = document.querySelectorAll('.control-btn.active');
+                    horizontalVelocity = 0;
+                    activeButtons.forEach(b => {
+                        if (b.id === 'left-btn') horizontalVelocity -= moveSpeed;
+                        if (b.id === 'right-btn') horizontalVelocity += moveSpeed;
+                    });
+                }
             });
             btn.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 btn.classList.remove('active');
-                action();
+                if (btn.id === 'left-btn' || btn.id === 'right-btn') {
+                    const activeButtons = document.querySelectorAll('.control-btn.active');
+                    horizontalVelocity = 0;
+                    activeButtons.forEach(b => {
+                        if (b.id === 'left-btn') horizontalVelocity -= moveSpeed;
+                        if (b.id === 'right-btn') horizontalVelocity += moveSpeed;
+                    });
+                }
             });
             btn.addEventListener('touchcancel', (e) => {
                 e.preventDefault();
                 btn.classList.remove('active');
-                action();
+                if (btn.id === 'left-btn' || btn.id === 'right-btn') {
+                    const activeButtons = document.querySelectorAll('.control-btn.active');
+                    horizontalVelocity = 0;
+                    activeButtons.forEach(b => {
+                        if (b.id === 'left-btn') horizontalVelocity -= moveSpeed;
+                        if (b.id === 'right-btn') horizontalVelocity += moveSpeed;
+                    });
+                }
             });
         }
 
         handleButtonStart(leftBtn, () => horizontalVelocity = -moveSpeed);
-        handleButtonEnd(leftBtn, () => horizontalVelocity = 0);
-
+        handleButtonEnd(leftBtn, () => {});
         handleButtonStart(rightBtn, () => horizontalVelocity = moveSpeed);
-        handleButtonEnd(rightBtn, () => horizontalVelocity = 0);
-
+        handleButtonEnd(rightBtn, () => {});
         handleButtonStart(jumpBtn, () => { if (!isJumping) jump(); });
         handleButtonEnd(jumpBtn, () => {});
 
