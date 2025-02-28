@@ -191,20 +191,12 @@
             if (e.code === 'ArrowRight') {
                 horizontalVelocity = moveSpeed;
             }
-            // Поддержка одновременного нажатия
-            let keys = {};
-            document.addEventListener('keydown', (e) => keys[e.code] = true);
-            document.addEventListener('keyup', (e) => delete keys[e.code]);
-            horizontalVelocity = (keys['ArrowLeft'] ? -moveSpeed : 0) + (keys['ArrowRight'] ? moveSpeed : 0);
         });
 
         game.addEventListener('keyup', (e) => {
             e.preventDefault();
             if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-                let keys = {};
-                document.addEventListener('keydown', (e) => keys[e.code] = true);
-                document.addEventListener('keyup', (e) => delete keys[e.code]);
-                horizontalVelocity = (keys['ArrowLeft'] ? -moveSpeed : 0) + (keys['ArrowRight'] ? moveSpeed : 0);
+                horizontalVelocity = 0; // Сбрасываем скорость при отпускании
             }
         });
 
@@ -231,38 +223,17 @@
         function handleButtonEnd(btn, action) {
             btn.addEventListener('mouseup', () => {
                 btn.classList.remove('active');
-                if (btn.id === 'left-btn' || btn.id === 'right-btn') {
-                    const activeButtons = document.querySelectorAll('.control-btn.active');
-                    horizontalVelocity = 0;
-                    activeButtons.forEach(b => {
-                        if (b.id === 'left-btn') horizontalVelocity -= moveSpeed;
-                        if (b.id === 'right-btn') horizontalVelocity += moveSpeed;
-                    });
-                }
+                if (btn.id === 'left-btn' || btn.id === 'right-btn') horizontalVelocity = 0;
             });
             btn.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 btn.classList.remove('active');
-                if (btn.id === 'left-btn' || btn.id === 'right-btn') {
-                    const activeButtons = document.querySelectorAll('.control-btn.active');
-                    horizontalVelocity = 0;
-                    activeButtons.forEach(b => {
-                        if (b.id === 'left-btn') horizontalVelocity -= moveSpeed;
-                        if (b.id === 'right-btn') horizontalVelocity += moveSpeed;
-                    });
-                }
+                if (btn.id === 'left-btn' || btn.id === 'right-btn') horizontalVelocity = 0;
             });
             btn.addEventListener('touchcancel', (e) => {
                 e.preventDefault();
                 btn.classList.remove('active');
-                if (btn.id === 'left-btn' || btn.id === 'right-btn') {
-                    const activeButtons = document.querySelectorAll('.control-btn.active');
-                    horizontalVelocity = 0;
-                    activeButtons.forEach(b => {
-                        if (b.id === 'left-btn') horizontalVelocity -= moveSpeed;
-                        if (b.id === 'right-btn') horizontalVelocity += moveSpeed;
-                    });
-                }
+                if (btn.id === 'left-btn' || btn.id === 'right-btn') horizontalVelocity = 0;
             });
         }
 
