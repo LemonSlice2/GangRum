@@ -177,16 +177,16 @@
         const rightBtn = document.getElementById('right-btn');
         let playerBottom = 0;
         let playerLeft = 180;
-        let velocity = 0;
+        let velocity = jumpForce; // Начинаем с прыжка
         let horizontalVelocity = 0;
-        let isJumping = false;
+        let isJumping = true;
         const gravity = 0.5;
         const jumpForce = 12;
         const moveSpeed = 5;
         let highestPlatformBottom = 300;
         let currentScore = 0;
         let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
-        const maxHeight = 500; // Ограничение высоты
+        const maxHeight = 500;
 
         highScoreDisplay.textContent = highScore;
 
@@ -200,7 +200,6 @@
         // Фокус для клавиш на ПК
         window.addEventListener('load', () => {
             game.focus();
-            jump(); // Начинаем прыжки сразу
         });
 
         game.addEventListener('click', () => {
@@ -320,7 +319,6 @@
                 const remainingPlatforms = document.querySelectorAll('.platform');
                 if (remainingPlatforms.length > 0) {
                     highestPlatformBottom = Math.max(...Array.from(remainingPlatforms).map(p => parseInt(p.style.bottom)));
-                    console.log('Highest platform bottom after shift:', highestPlatformBottom); // Отладка
                 }
             }, 500);
         }
@@ -355,11 +353,12 @@
                     platformVelocity = 0;
                 }
 
+                // Более надежное условие приземления
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
                     velocity <= 0 &&
-                    Math.abs(playerBottom + velocity - (platformBottom + 20)) < 5 // Более мягкая проверка приземления
+                    Math.abs(playerBottom + velocity - platformBottom) < 10 // Смягчили проверку
                 ) {
                     if (
                         playerLeft + playerWidth > platformLeft &&
@@ -386,7 +385,7 @@
                 }
             });
 
-            // Ограничение высоты и сброс
+            // Ограничение высоты и принудительное падение
             if (playerBottom <= 0) {
                 playerBottom = 0;
                 velocity = jumpForce; // Прыжок с пола
@@ -395,8 +394,8 @@
                 onPlatform = false;
                 currentScore = 0;
                 currentScoreDisplay.textContent = currentScore;
-            } else if (playerBottom >= maxHeight || velocity > 0 && playerBottom > 300) {
-                velocity = -gravity * 2; // Форсированный спад
+            } else if (playerBottom >= maxHeight || (velocity > 0 && playerBottom > 300)) {
+                velocity = -gravity * 5; // Форсированный спад с усилением
                 isJumping = true;
                 player.classList.add('jumping');
             }
