@@ -320,6 +320,7 @@
                 const remainingPlatforms = document.querySelectorAll('.platform');
                 if (remainingPlatforms.length > 0) {
                     highestPlatformBottom = Math.max(...Array.from(remainingPlatforms).map(p => parseInt(p.style.bottom)));
+                    console.log('Highest platform bottom after shift:', highestPlatformBottom); // Отладка
                 }
             }, 500);
         }
@@ -357,8 +358,8 @@
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
-                    velocity <= 0 && // Приземление только при падении
-                    Math.abs(playerBottom - (platformBottom + 20)) < 2 // Точная проверка приземления
+                    velocity <= 0 &&
+                    Math.abs(playerBottom + velocity - (platformBottom + 20)) < 5 // Более мягкая проверка приземления
                 ) {
                     if (
                         playerLeft + playerWidth > platformLeft &&
@@ -385,7 +386,7 @@
                 }
             });
 
-            // Ограничение высоты
+            // Ограничение высоты и сброс
             if (playerBottom <= 0) {
                 playerBottom = 0;
                 velocity = jumpForce; // Прыжок с пола
@@ -394,8 +395,8 @@
                 onPlatform = false;
                 currentScore = 0;
                 currentScoreDisplay.textContent = currentScore;
-            } else if (playerBottom >= maxHeight) {
-                velocity = -jumpForce / 2; // Возвращаем вниз
+            } else if (playerBottom >= maxHeight || velocity > 0 && playerBottom > 300) {
+                velocity = -gravity * 2; // Форсированный спад
                 isJumping = true;
                 player.classList.add('jumping');
             }
