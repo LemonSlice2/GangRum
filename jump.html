@@ -30,6 +30,7 @@
             left: 0;
             overflow: hidden;
             border: 2px solid black;
+            outline: none;
         }
         
         #player {
@@ -39,7 +40,7 @@
             position: absolute;
             left: 180px;
             bottom: 0;
-            transition: left 0.1s;
+            transition: bottom 0.1s, left 0.1s;
         }
         
         #player.jumping {
@@ -54,26 +55,27 @@
         .platform {
             width: 100px;
             height: 20px;
+            background: green;
             position: absolute;
+            transition: bottom 0.5s ease;
+            opacity: 0;
+        }
+        
+        .platform.visible {
             opacity: 1;
         }
 
         .platform.moving-left {
-            animation: moveLeft 2s linear infinite alternate;
+            animation: moveHorizontal 2s linear infinite alternate;
         }
 
         .platform.moving-right {
-            animation: moveRight 2s linear infinite alternate;
+            animation: moveHorizontal 2s linear infinite alternate-reverse;
         }
 
-        @keyframes moveLeft {
+        @keyframes moveHorizontal {
             from { left: 0; }
             to { left: calc(400px - 100px); }
-        }
-
-        @keyframes moveRight {
-            from { left: calc(400px - 100px); }
-            to { left: 0; }
         }
 
         #score-board {
@@ -88,7 +90,7 @@
 
         #controls {
             position: absolute;
-            bottom: 10px;
+            top: 620px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -125,9 +127,9 @@
                 <div>Счет: <span id="current-score">0</span></div>
                 <div>Рекорд: <span id="high-score">0</span></div>
             </div>
-            <div class="platform" style="bottom: 100px; left: 150px; background: yellow;" data-level="1"></div>
-            <div class="platform" style="bottom: 200px; left: 50px; background: yellow;" data-level="2"></div>
-            <div class="platform" style="bottom: 300px; left: 250px; background: yellow;" data-level="3"></div>
+            <div class="platform visible" style="bottom: 100px; left: 150px;" data-level="1"></div>
+            <div class="platform visible" style="bottom: 200px; left: 50px;" data-level="2"></div>
+            <div class="platform visible" style="bottom: 300px; left: 250px;" data-level="3"></div>
         </div>
         <div id="controls">
             <div class="control-btn" id="left-btn">←</div>
@@ -166,7 +168,6 @@
         window.addEventListener('load', () => game.focus());
         game.addEventListener('click', () => game.focus());
 
-        // Управление клавишами
         game.addEventListener('keydown', (e) => {
             e.preventDefault();
             if ((e.code === 'Space' || e.code === 'ArrowUp') && !isJumping) jump();
@@ -179,7 +180,6 @@
             if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') horizontalVelocity = 0;
         });
 
-        // Управление кнопками
         leftBtn.addEventListener('mousedown', () => {
             horizontalVelocity = -moveSpeed;
             leftBtn.classList.add('active');
@@ -240,12 +240,6 @@
             }
         }
 
-        function getPlatformColor(level) {
-            const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'];
-            const colorIndex = Math.floor((level - 1) / 15) % colors.length;
-            return colors[colorIndex];
-        }
-
         function addNewPlatform() {
             const newPlatform = document.createElement('div');
             newPlatform.classList.add('platform');
@@ -256,8 +250,7 @@
             newPlatform.style.bottom = newBottom + 'px';
             newPlatform.dataset.level = newLevel;
             newPlatform.dataset.counted = 'false';
-            newPlatform.style.background = getPlatformColor(newLevel);
-
+            newPlatform.style.background = 'green';
             if (newLevel >= 20) {
                 const moveDirection = Math.random() < 0.5 ? 'moving-left' : 'moving-right';
                 if (newLevel >= 40) {
@@ -265,10 +258,9 @@
                 } else {
                     if (Math.random() < 0.3) newPlatform.classList.add(moveDirection);
                 }
-                newPlatform.style.position = 'absolute';
             }
-
             game.appendChild(newPlatform);
+            setTimeout(() => newPlatform.classList.add('visible'), 10);
             highestPlatformBottom = newBottom;
         }
 
@@ -301,8 +293,11 @@
         function gameLoop() {
             velocity -= gravity;
             playerBottom += velocity;
+            playerLeft += horizontalVelocity;
 
-            let platformVelocity = 0;
+            if (playerLeft <= 0) playerLeft = 0;
+            if (playerLeft >= game.offsetWidth - 40) playerLeft = game.offsetWidth - 40;
+
             let onPlatform = false;
 
             const platforms = document.querySelectorAll('.platform');
@@ -312,18 +307,10 @@
                 const playerWidth = 40;
                 const platformWidth = 100;
 
-                if (platform.classList.contains('moving-left') || platform.classList.contains('moving-right')) {
-                    const computedLeft = parseInt(getComputedStyle(platform).left);
-                    platformVelocity = computedLeft - platformLeft;
-                    platformLeft = computedLeft;
-                } else {
-                    platformVelocity = 0;
-                }
-
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
-                    velocity <= 0
+                    velocity < 0
                 ) {
                     if (
                         playerLeft + playerWidth > platformLeft &&
@@ -350,15 +337,9 @@
                 velocity = 0;
                 isJumping = false;
                 player.classList.remove('jumping');
-                onPlatform = false;
                 currentScore = 0;
                 currentScoreDisplay.textContent = currentScore;
             }
-
-            playerLeft += (onPlatform ? platformVelocity : 0) + horizontalVelocity;
-
-            if (playerLeft <= 0) playerLeft = 0;
-            if (playerLeft >= game.offsetWidth - 40) playerLeft = game.offsetWidth - 40;
 
             if (playerBottom >= 400) {
                 shiftPlatformsDown();
