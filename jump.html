@@ -18,7 +18,7 @@
         #game-container {
             position: relative;
             width: 400px;
-            height: 600px; /* Убираем лишнюю высоту */
+            height: 600px;
         }
 
         #game {
@@ -97,8 +97,8 @@
             background: rgba(0, 0, 0, 0.3);
             border-radius: 50%;
             position: absolute;
-            bottom: 20px; /* Внутри экрана, снизу */
-            right: 20px;  /* Справа */
+            bottom: 20px;
+            right: 20px;
             touch-action: none;
             z-index: 10;
         }
@@ -216,6 +216,9 @@
             stick.style.left = '50%';
             stick.style.top = '50%';
             horizontalVelocity = 0;
+            if (isJumping) {
+                player.classList.remove('jumping'); // Убираем вращение, если прыжок не активен
+            }
         });
 
         function updateStickPosition(touch) {
@@ -236,7 +239,8 @@
 
             horizontalVelocity = (dx / maxDistance) * maxSpeed;
 
-            if (dy < -maxDistance / 2 && !isJumping) {
+            // Прыжок только при значительном движении вверх
+            if (dy < -maxDistance * 0.7 && !isJumping) { // Увеличили порог до 70%
                 jump();
             }
         }
