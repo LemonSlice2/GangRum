@@ -55,26 +55,7 @@
             width: 100px;
             height: 20px;
             position: absolute;
-            transition: bottom 0.5s ease;
             opacity: 1;
-        }
-
-        .platform.moving-left {
-            animation: moveLeft 2s linear infinite alternate;
-        }
-
-        .platform.moving-right {
-            animation: moveRight 2s linear infinite alternate;
-        }
-
-        @keyframes moveLeft {
-            from { left: 0; }
-            to { left: calc(400px - 100px); }
-        }
-
-        @keyframes moveRight {
-            from { left: calc(400px - 100px); }
-            to { left: 0; }
         }
 
         #score-board {
@@ -159,8 +140,6 @@
 
         highScoreDisplay.textContent = highScore;
 
-        const platformColors = ['yellow', 'red', 'purple', 'orange', 'blue'];
-
         if (window.Telegram && window.Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
@@ -183,48 +162,57 @@
         });
 
         // Управление кнопками
-        function handleButtonStart(btn) {
-            btn.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                btn.classList.add('active');
-                if (btn.id === 'left-btn') horizontalVelocity = -moveSpeed;
-                if (btn.id === 'right-btn') horizontalVelocity = moveSpeed;
-                if (btn.id === 'jump-btn' && !isJumping) jump();
-            });
-            btn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (e.touches.length === 1) { // Фильтр для одиночных касаний
-                    btn.classList.add('active');
-                    if (btn.id === 'left-btn') horizontalVelocity = -moveSpeed;
-                    if (btn.id === 'right-btn') horizontalVelocity = moveSpeed;
-                    if (btn.id === 'jump-btn' && !isJumping) jump();
-                }
-            });
-        }
+        leftBtn.addEventListener('mousedown', () => {
+            horizontalVelocity = -moveSpeed;
+            leftBtn.classList.add('active');
+        });
+        leftBtn.addEventListener('mouseup', () => {
+            horizontalVelocity = 0;
+            leftBtn.classList.remove('active');
+        });
 
-        function handleButtonEnd(btn) {
-            btn.addEventListener('mouseup', () => {
-                btn.classList.remove('active');
-                if (btn.id === 'left-btn' || btn.id === 'right-btn') horizontalVelocity = 0;
-            });
-            btn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                btn.classList.remove('active');
-                if (btn.id === 'left-btn' || btn.id === 'right-btn') horizontalVelocity = 0;
-            });
-            btn.addEventListener('touchcancel', (e) => {
-                e.preventDefault();
-                btn.classList.remove('active');
-                if (btn.id === 'left-btn' || btn.id === 'right-btn') horizontalVelocity = 0;
-            });
-        }
+        rightBtn.addEventListener('mousedown', () => {
+            horizontalVelocity = moveSpeed;
+            rightBtn.classList.add('active');
+        });
+        rightBtn.addEventListener('mouseup', () => {
+            horizontalVelocity = 0;
+            rightBtn.classList.remove('active');
+        });
 
-        handleButtonStart(leftBtn);
-        handleButtonEnd(leftBtn);
-        handleButtonStart(rightBtn);
-        handleButtonEnd(rightBtn);
-        handleButtonStart(jumpBtn);
-        handleButtonEnd(jumpBtn);
+        jumpBtn.addEventListener('mousedown', () => {
+            if (!isJumping) jump();
+            jumpBtn.classList.add('active');
+        });
+        jumpBtn.addEventListener('mouseup', () => {
+            jumpBtn.classList.remove('active');
+        });
+
+        leftBtn.addEventListener('touchstart', () => {
+            horizontalVelocity = -moveSpeed;
+            leftBtn.classList.add('active');
+        });
+        leftBtn.addEventListener('touchend', () => {
+            horizontalVelocity = 0;
+            leftBtn.classList.remove('active');
+        });
+
+        rightBtn.addEventListener('touchstart', () => {
+            horizontalVelocity = moveSpeed;
+            rightBtn.classList.add('active');
+        });
+        rightBtn.addEventListener('touchend', () => {
+            horizontalVelocity = 0;
+            rightBtn.classList.remove('active');
+        });
+
+        jumpBtn.addEventListener('touchstart', () => {
+            if (!isJumping) jump();
+            jumpBtn.classList.add('active');
+        });
+        jumpBtn.addEventListener('touchend', () => {
+            jumpBtn.classList.remove('active');
+        });
 
         function jump() {
             if (!isJumping) {
@@ -234,40 +222,18 @@
             }
         }
 
-        function getPlatformColor(level) {
-            const colorIndex = Math.min(Math.floor((level - 1) / 15), platformColors.length - 1);
-            return platformColors[colorIndex];
-        }
-
         function addNewPlatform() {
             const newPlatform = document.createElement('div');
             newPlatform.classList.add('platform');
             const randomX = Math.floor(Math.random() * (game.offsetWidth - 100));
             const newBottom = highestPlatformBottom + 100;
-            const newLevel = parseInt(document.querySelector('.platform:last-child').dataset.level) + 1;
             newPlatform.style.left = randomX + 'px';
             newPlatform.style.bottom = newBottom + 'px';
-            newPlatform.dataset.level = newLevel;
+            newPlatform.dataset.level = parseInt(document.querySelector('.platform:last-child').dataset.level) + 1;
             newPlatform.dataset.counted = 'false';
-            newPlatform.style.background = getPlatformColor(newLevel);
-
-            if (newLevel >= 15) {
-                const moveDirection = Math.random() < 0.5 ? 'moving-left' : 'moving-right';
-                if (newLevel >= 40 && Math.random() < 0.5) {
-                    // Неподвижная
-                } else {
-                    newPlatform.classList.add(moveDirection);
-                    newPlatform.style.position = 'absolute';
-                }
-            }
-
-            if (newLevel >= 60 && Math.random() < 0.3) {
-                newPlatform.classList.add('breakable');
-            }
-
+            newPlatform.style.background = 'yellow';
             game.appendChild(newPlatform);
             highestPlatformBottom = newBottom;
-            setTimeout(() => newPlatform.classList.add('visible'), 10);
         }
 
         function shiftPlatformsDown() {
@@ -277,7 +243,7 @@
                 currentBottom -= 100;
                 platform.style.bottom = currentBottom + 'px';
                 if (currentBottom < -20) {
-                    platform.remove(); // Удаляем платформы, вышедшие за экран
+                    platform.remove();
                 }
             });
             setTimeout(() => {
@@ -300,7 +266,6 @@
             velocity -= gravity;
             playerBottom += velocity;
 
-            let platformVelocity = 0;
             let onPlatform = false;
 
             const platforms = document.querySelectorAll('.platform');
@@ -309,14 +274,6 @@
                 let platformLeft = parseInt(platform.style.left);
                 const playerWidth = 40;
                 const platformWidth = 100;
-
-                if (platform.classList.contains('moving-left') || platform.classList.contains('moving-right')) {
-                    const computedLeft = parseInt(getComputedStyle(platform).left);
-                    platformVelocity = computedLeft - platformLeft;
-                    platformLeft = computedLeft;
-                } else {
-                    platformVelocity = 0;
-                }
 
                 if (
                     playerBottom <= platformBottom + 20 &&
@@ -339,11 +296,6 @@
                             platform.dataset.counted = 'true';
                             updateHighScore();
                         }
-
-                        if (platform.classList.contains('breakable')) {
-                            platform.style.opacity = '0';
-                            setTimeout(() => platform.remove(), 500);
-                        }
                     }
                 }
             });
@@ -353,12 +305,11 @@
                 velocity = 0;
                 isJumping = false;
                 player.classList.remove('jumping');
-                onPlatform = false;
                 currentScore = 0;
                 currentScoreDisplay.textContent = currentScore;
             }
 
-            playerLeft += (onPlatform ? platformVelocity : 0) + horizontalVelocity;
+            playerLeft += horizontalVelocity;
 
             if (playerLeft <= 0) playerLeft = 0;
             if (playerLeft >= game.offsetWidth - 40) playerLeft = game.offsetWidth - 40;
