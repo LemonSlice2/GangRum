@@ -192,16 +192,16 @@
                 horizontalVelocity = moveSpeed;
             }
             // Поддержка одновременного нажатия
-            if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-                horizontalVelocity = (e.code === 'ArrowLeft' ? -moveSpeed : 0) + (e.code === 'ArrowRight' ? moveSpeed : 0);
-            }
+            let keys = {};
+            document.addEventListener('keydown', (e) => keys[e.code] = true);
+            document.addEventListener('keyup', (e) => delete keys[e.code]);
+            horizontalVelocity = (keys['ArrowLeft'] ? -moveSpeed : 0) + (keys['ArrowRight'] ? moveSpeed : 0);
         });
 
         game.addEventListener('keyup', (e) => {
             e.preventDefault();
             if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-                // Пересчитываем скорость при отпускании
-                const keys = {};
+                let keys = {};
                 document.addEventListener('keydown', (e) => keys[e.code] = true);
                 document.addEventListener('keyup', (e) => delete keys[e.code]);
                 horizontalVelocity = (keys['ArrowLeft'] ? -moveSpeed : 0) + (keys['ArrowRight'] ? moveSpeed : 0);
@@ -232,7 +232,6 @@
             btn.addEventListener('mouseup', () => {
                 btn.classList.remove('active');
                 if (btn.id === 'left-btn' || btn.id === 'right-btn') {
-                    // Пересчитываем скорость
                     const activeButtons = document.querySelectorAll('.control-btn.active');
                     horizontalVelocity = 0;
                     activeButtons.forEach(b => {
@@ -267,9 +266,9 @@
             });
         }
 
-        handleButtonStart(leftBtn, () => horizontalVelocity = -moveSpeed);
+        handleButtonStart(leftBtn, () => {});
         handleButtonEnd(leftBtn, () => {});
-        handleButtonStart(rightBtn, () => horizontalVelocity = moveSpeed);
+        handleButtonStart(rightBtn, () => {});
         handleButtonEnd(rightBtn, () => {});
         handleButtonStart(jumpBtn, () => { if (!isJumping) jump(); });
         handleButtonEnd(jumpBtn, () => {});
