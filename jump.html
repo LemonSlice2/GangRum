@@ -39,7 +39,7 @@
             position: absolute;
             left: 180px;
             bottom: 0;
-            transition: bottom 0.1s, left 0.1s;
+            /* Убрал transition, чтобы проверить рендеринг */
         }
         
         #player.jumping {
@@ -266,6 +266,7 @@
                 isJumping = true;
                 velocity = jumpForce;
                 player.classList.add('jumping');
+                console.log('Jump triggered, velocity:', velocity); // Отладка
             }
         }
 
@@ -335,6 +336,8 @@
             velocity -= gravity;
             playerBottom += velocity;
 
+            console.log('Velocity:', velocity, 'PlayerBottom:', playerBottom); // Отладка
+
             let platformVelocity = 0;
             let onPlatform = false;
 
@@ -353,7 +356,6 @@
                     platformVelocity = 0;
                 }
 
-                // Точное приземление
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
