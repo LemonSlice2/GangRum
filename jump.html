@@ -18,15 +18,15 @@
         #game-container {
             position: relative;
             width: 400px;
-            height: 700px; /* Для кнопок ниже */
+            height: 700px; /* Увеличили для рекламной строки */
         }
 
         #game {
             width: 400px;
-            height: 600px;
+            height: 580px; /* Уменьшили высоту игры для рекламной строки */
             background: #87CEEB;
             position: absolute;
-            top: 0;
+            top: 40px; /* Сдвигаем игру вниз */
             left: 0;
             overflow: hidden;
             border: 2px solid black;
@@ -91,6 +91,22 @@
             z-index: 10;
         }
 
+        #ad-banner {
+            width: 400px;
+            height: 40px;
+            background: #f0e68c; /* Желтый фон для заметности */
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: black;
+            z-index: 20;
+        }
+
         #controls {
             position: absolute;
             bottom: 10px;
@@ -124,6 +140,7 @@
 </head>
 <body>
     <div id="game-container">
+        <div id="ad-banner">Собираем Васе на лечение, писать боту</div>
         <div id="game" tabindex="0">
             <div id="player"></div>
             <div id="score-board">
@@ -173,6 +190,7 @@
         // Фокус для клавиш на ПК
         window.addEventListener('load', () => {
             game.focus();
+            jump(); // Начинаем прыжки сразу
         });
 
         game.addEventListener('click', () => {
@@ -342,9 +360,9 @@
                         playerLeft < platformLeft + platformWidth
                     ) {
                         playerBottom = platformBottom + 20;
-                        velocity = 0;
-                        isJumping = false;
-                        player.classList.remove('jumping');
+                        velocity = jumpForce; // Автоматический прыжок
+                        isJumping = true;
+                        player.classList.add('jumping');
                         onPlatform = true;
 
                         if (platform.dataset.counted === 'false') {
@@ -364,9 +382,9 @@
 
             if (playerBottom <= 0) {
                 playerBottom = 0;
-                velocity = 0;
-                isJumping = false;
-                player.classList.remove('jumping');
+                velocity = jumpForce; // Автоматический прыжок с пола
+                isJumping = true;
+                player.classList.add('jumping');
                 onPlatform = false;
                 currentScore = 0;
                 currentScoreDisplay.textContent = currentScore;
@@ -380,6 +398,9 @@
             if (playerBottom >= 400) {
                 shiftPlatformsDown();
                 playerBottom -= 100;
+                velocity = jumpForce; // Прыжок после сдвига
+                isJumping = true;
+                player.classList.add('jumping');
             }
 
             while (highestPlatformBottom < 600) {
@@ -388,6 +409,13 @@
 
             player.style.bottom = playerBottom + 'px';
             player.style.left = playerLeft + 'px';
+
+            if (velocity > 0) {
+                isJumping = true;
+            } else if (velocity <= 0 && !onPlatform) {
+                isJumping = false;
+                player.classList.remove('jumping');
+            }
 
             requestAnimationFrame(gameLoop);
         }
