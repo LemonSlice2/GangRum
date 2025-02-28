@@ -217,7 +217,6 @@
 
         function updateStickPosition(touch) {
             const joystickCenterX = joystickRect.left + joystickRect.width / 2;
-            const joystickCenterY = joystickRect.top + joystickRect.height / 2;
             let dx = touch.clientX - joystickCenterX;
             const distance = Math.abs(dx);
             const maxDistance = joystick.offsetWidth / 2 - stick.offsetWidth / 2;
@@ -304,7 +303,7 @@
             playerBottom += velocity;
 
             let platformVelocity = 0;
-            let onMovingPlatform = false;
+            let onPlatform = false;
 
             const platforms = document.querySelectorAll('.platform');
             platforms.forEach(platform => {
@@ -324,7 +323,7 @@
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
-                    velocity < 0
+                    velocity <= 0 // Условие для приземления
                 ) {
                     if (
                         playerLeft + playerWidth > platformLeft &&
@@ -332,8 +331,8 @@
                     ) {
                         playerBottom = platformBottom + 20;
                         velocity = 0;
-                        jump(); // Прыгаем снова
-                        onMovingPlatform = true;
+                        jump(); // Автоматический прыжок при приземлении
+                        onPlatform = true;
 
                         if (platform.dataset.counted === 'false') {
                             currentScore = Math.max(currentScore, parseInt(platform.dataset.level));
@@ -353,16 +352,14 @@
             if (playerBottom <= 0) {
                 playerBottom = 0;
                 velocity = 0;
-                jump(); // Прыгаем с пола
+                jump(); // Автоматический прыжок с пола
                 currentScore = 0;
                 currentScoreDisplay.textContent = currentScore;
+                onPlatform = false;
             }
 
-            if (onMovingPlatform) {
-                playerLeft += platformVelocity;
-            } else {
-                playerLeft += horizontalVelocity;
-            }
+            // Движение с платформой или от игрока
+            playerLeft += onPlatform ? platformVelocity : horizontalVelocity;
 
             if (playerLeft <= 0) playerLeft = 0;
             if (playerLeft >= game.offsetWidth - 40) playerLeft = game.offsetWidth - 40;
