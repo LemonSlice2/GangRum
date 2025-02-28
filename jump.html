@@ -127,9 +127,9 @@
                 <div>Счет: <span id="current-score">0</span></div>
                 <div>Рекорд: <span id="high-score">0</span></div>
             </div>
-            <div class="platform visible" style="bottom: 100px; left: 150px;" data-level="1"></div>
-            <div class="platform visible" style="bottom: 200px; left: 50px;" data-level="2"></div>
-            <div class="platform visible" style="bottom: 300px; left: 250px;" data-level="3"></div>
+            <div class="platform visible" style="bottom: 20px; left: 150px;" data-level="1"></div> <!-- Изменил bottom с 100px на 20px для старта -->
+            <div class="platform visible" style="bottom: 120px; left: 50px;" data-level="2"></div>
+            <div class="platform visible" style="bottom: 220px; left: 250px;" data-level="3"></div>
         </div>
         <div id="controls">
             <div class="control-btn" id="left-btn">←</div>
@@ -154,7 +154,7 @@
         const gravity = 0.5;
         const jumpForce = 12;
         const moveSpeed = 5;
-        let highestPlatformBottom = 300;
+        let highestPlatformBottom = 220; // Обновил начальную высоту
         let currentScore = 0;
         let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
 
@@ -313,6 +313,12 @@
                 let platformLeft = parseInt(platform.style.left);
                 const playerWidth = 40;
                 const platformWidth = 100;
+
+                // Начальное приземление на первую платформу
+                if (playerBottom === 0 && platformBottom === 20 && Math.abs(playerLeft - (platformLeft + 50)) < 50) {
+                    playerBottom = 20;
+                    onPlatform = true;
+                }
 
                 if (
                     playerBottom <= platformBottom + 20 &&
