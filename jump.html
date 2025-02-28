@@ -58,6 +58,24 @@
             opacity: 1;
         }
 
+        .platform.moving-left {
+            animation: moveLeft 2s linear infinite alternate;
+        }
+
+        .platform.moving-right {
+            animation: moveRight 2s linear infinite alternate;
+        }
+
+        @keyframes moveLeft {
+            from { left: 0; }
+            to { left: calc(400px - 100px); }
+        }
+
+        @keyframes moveRight {
+            from { left: calc(400px - 100px); }
+            to { left: 0; }
+        }
+
         #score-board {
             position: absolute;
             top: 10px;
@@ -222,16 +240,34 @@
             }
         }
 
+        function getPlatformColor(level) {
+            const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'];
+            const colorIndex = Math.floor((level - 1) / 15) % colors.length;
+            return colors[colorIndex];
+        }
+
         function addNewPlatform() {
             const newPlatform = document.createElement('div');
             newPlatform.classList.add('platform');
             const randomX = Math.floor(Math.random() * (game.offsetWidth - 100));
             const newBottom = highestPlatformBottom + 100;
+            const newLevel = parseInt(document.querySelector('.platform:last-child').dataset.level) + 1;
             newPlatform.style.left = randomX + 'px';
             newPlatform.style.bottom = newBottom + 'px';
-            newPlatform.dataset.level = parseInt(document.querySelector('.platform:last-child').dataset.level) + 1;
+            newPlatform.dataset.level = newLevel;
             newPlatform.dataset.counted = 'false';
-            newPlatform.style.background = 'yellow';
+            newPlatform.style.background = getPlatformColor(newLevel);
+
+            if (newLevel >= 20) {
+                const moveDirection = Math.random() < 0.5 ? 'moving-left' : 'moving-right';
+                if (newLevel >= 40) {
+                    if (Math.random() < 0.5) newPlatform.classList.add(moveDirection);
+                } else {
+                    if (Math.random() < 0.3) newPlatform.classList.add(moveDirection);
+                }
+                newPlatform.style.position = 'absolute';
+            }
+
             game.appendChild(newPlatform);
             highestPlatformBottom = newBottom;
         }
@@ -266,6 +302,7 @@
             velocity -= gravity;
             playerBottom += velocity;
 
+            let platformVelocity = 0;
             let onPlatform = false;
 
             const platforms = document.querySelectorAll('.platform');
@@ -274,6 +311,14 @@
                 let platformLeft = parseInt(platform.style.left);
                 const playerWidth = 40;
                 const platformWidth = 100;
+
+                if (platform.classList.contains('moving-left') || platform.classList.contains('moving-right')) {
+                    const computedLeft = parseInt(getComputedStyle(platform).left);
+                    platformVelocity = computedLeft - platformLeft;
+                    platformLeft = computedLeft;
+                } else {
+                    platformVelocity = 0;
+                }
 
                 if (
                     playerBottom <= platformBottom + 20 &&
@@ -305,11 +350,12 @@
                 velocity = 0;
                 isJumping = false;
                 player.classList.remove('jumping');
+                onPlatform = false;
                 currentScore = 0;
                 currentScoreDisplay.textContent = currentScore;
             }
 
-            playerLeft += horizontalVelocity;
+            playerLeft += (onPlatform ? platformVelocity : 0) + horizontalVelocity;
 
             if (playerLeft <= 0) playerLeft = 0;
             if (playerLeft >= game.offsetWidth - 40) playerLeft = game.offsetWidth - 40;
