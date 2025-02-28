@@ -240,6 +240,12 @@
             }
         }
 
+        function getPlatformColor(level) {
+            const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'];
+            const colorIndex = Math.floor((level - 1) / 15) % colors.length;
+            return colors[colorIndex];
+        }
+
         function addNewPlatform() {
             const newPlatform = document.createElement('div');
             newPlatform.classList.add('platform');
@@ -250,7 +256,8 @@
             newPlatform.style.bottom = newBottom + 'px';
             newPlatform.dataset.level = newLevel;
             newPlatform.dataset.counted = 'false';
-            newPlatform.style.background = 'green';
+            newPlatform.style.background = getPlatformColor(newLevel);
+
             if (newLevel >= 20) {
                 const moveDirection = Math.random() < 0.5 ? 'moving-left' : 'moving-right';
                 if (newLevel >= 40) {
@@ -310,7 +317,8 @@
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
-                    velocity < 0
+                    velocity < 0 &&
+                    Math.abs(playerBottom + velocity - platformBottom) < 2
                 ) {
                     if (
                         playerLeft + playerWidth > platformLeft &&
