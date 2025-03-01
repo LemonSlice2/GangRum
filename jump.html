@@ -13,7 +13,7 @@
             min-height: 100vh;
             background: #f0f0f0;
             position: relative;
-            touch-action: none; /* Отключаем стандартные действия сенсора */
+            touch-action: none;
         }
         
         #game-container {
@@ -95,8 +95,8 @@
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            justify-content: space-between;
-            width: 300px;
+            justify-content: center;
+            width: 100px;
             z-index: 10;
         }
 
@@ -109,28 +109,7 @@
             touch-action: none;
         }
 
-        .joystick .stick {
-            width: 50px;
-            height: 50px;
-            background: #555;
-            border-radius: 50%;
-            position: absolute;
-            top: 25px;
-            left: 25px;
-            touch-action: none;
-            transition: transform 0.1s;
-        }
-
-        .jump-joystick {
-            width: 100px;
-            height: 100px;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            position: relative;
-            touch-action: none;
-        }
-
-        .jump-stick {
+        .stick {
             width: 50px;
             height: 50px;
             background: #555;
@@ -156,11 +135,8 @@
             <div class="platform visible" style="bottom: 300px; left: 250px;" data-level="3"></div>
         </div>
         <div id="controls">
-            <div class="joystick" id="move-joystick">
-                <div class="stick" id="move-stick"></div>
-            </div>
-            <div class="jump-joystick" id="jump-joystick">
-                <div class="jump-stick" id="jump-stick"></div>
+            <div class="joystick" id="joystick">
+                <div class="stick" id="stick"></div>
             </div>
         </div>
     </div>
@@ -170,10 +146,8 @@
         const player = document.getElementById('player');
         const currentScoreDisplay = document.getElementById('current-score');
         const highScoreDisplay = document.getElementById('high-score');
-        const moveJoystick = document.getElementById('move-joystick');
-        const moveStick = document.getElementById('move-stick');
-        const jumpJoystick = document.getElementById('jump-joystick');
-        const jumpStick = document.getElementById('jump-stick');
+        const joystick = document.getElementById('joystick');
+        const stick = document.getElementById('stick');
         let playerBottom = 0;
         let playerLeft = 180;
         let velocity = 0;
@@ -196,41 +170,41 @@
         window.addEventListener('load', () => game.focus());
         game.addEventListener('click', () => game.focus());
 
-        // Джойстик для движения
-        let moveTouchStartX = 0;
-        let moveTouchStartY = 0;
-        let moveStickX = 0;
-        let moveStickY = 0;
+        // Управление джойстиком
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let stickX = 0;
+        let stickY = 0;
 
-        moveJoystick.addEventListener('touchstart', (e) => {
+        joystick.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
-            moveTouchStartX = touch.clientX - moveJoystick.getBoundingClientRect().left - 50;
-            moveTouchStartY = touch.clientY - moveJoystick.getBoundingClientRect().top - 50;
-            updateMoveJoystick(touch);
+            touchStartX = touch.clientX - joystick.getBoundingClientRect().left - 50;
+            touchStartY = touch.clientY - joystick.getBoundingClientRect().top - 50;
+            updateJoystick(touch);
         });
 
-        moveJoystick.addEventListener('touchmove', (e) => {
+        joystick.addEventListener('touchmove', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
-            updateMoveJoystick(touch);
+            updateJoystick(touch);
         });
 
-        moveJoystick.addEventListener('touchend', () => {
+        joystick.addEventListener('touchend', () => {
             horizontalVelocity = 0;
-            moveStick.style.transform = 'translate(0px, 0px)';
-            moveStickX = 0;
-            moveStickY = 0;
+            isJumping = false;
+            stick.style.transform = 'translate(0px, 0px)';
+            stickX = 0;
+            stickY = 0;
         });
 
-        function updateMoveJoystick(touch) {
-            const joystickRect = moveJoystick.getBoundingClientRect();
-            const stickRect = moveStick.getBoundingClientRect();
+        function updateJoystick(touch) {
+            const joystickRect = joystick.getBoundingClientRect();
             const touchX = touch.clientX - joystickRect.left - 50;
             const touchY = touch.clientY - joystickRect.top - 50;
 
-            let dx = touchX - moveTouchStartX;
-            let dy = touchY - moveTouchStartY;
+            let dx = touchX - touchStartX;
+            let dy = touchY - touchStartY;
 
             const distance = Math.sqrt(dx * dx + dy * dy);
             const maxDistance = 50;
@@ -240,54 +214,18 @@
                 dy = Math.sin(angle) * maxDistance;
             }
 
-            moveStickX = dx;
-            moveStickY = dy;
-            moveStick.style.transform = `translate(${dx}px, ${dy}px)`;
+            stickX = dx;
+            stickY = dy;
+            stick.style.transform = `translate(${dx}px, ${dy}px)`;
 
-            // Определяем движение
+            // Управление движением
             if (Math.abs(dx) > 10) {
                 horizontalVelocity = dx > 0 ? moveSpeed : -moveSpeed;
             } else {
                 horizontalVelocity = 0;
             }
-        }
 
-        // Джойстик для прыжка
-        let jumpTouchStartY = 0;
-        let jumpStickY = 0;
-
-        jumpJoystick.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            jumpTouchStartY = touch.clientY - jumpJoystick.getBoundingClientRect().top - 50;
-            updateJumpJoystick(touch);
-        });
-
-        jumpJoystick.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            updateJumpJoystick(touch);
-        });
-
-        jumpJoystick.addEventListener('touchend', () => {
-            jumpStick.style.transform = 'translate(0px, 0px)';
-            jumpStickY = 0;
-        });
-
-        function updateJumpJoystick(touch) {
-            const joystickRect = jumpJoystick.getBoundingClientRect();
-            const stickRect = jumpStick.getBoundingClientRect();
-            const touchY = touch.clientY - joystickRect.top - 50;
-
-            let dy = touchY - jumpTouchStartY;
-            const maxDistance = 50;
-            if (Math.abs(dy) > maxDistance) {
-                dy = dy > 0 ? maxDistance : -maxDistance;
-            }
-
-            jumpStickY = dy;
-            jumpStick.style.transform = `translate(0px, ${dy}px)`;
-
+            // Управление прыжком
             if (dy < -10 && !isJumping) {
                 jump();
             }
@@ -364,14 +302,9 @@
             const platforms = document.querySelectorAll('.platform');
             platforms.forEach(platform => {
                 let platformBottom = parseInt(platform.style.bottom);
-                let platformLeft = parseInt(platform.style.left); // Начальная позиция
+                let platformLeft = parseInt(getComputedStyle(platform).left); // Реальная позиция
                 const playerWidth = 40;
                 const platformWidth = 100;
-
-                // Проверка текущей позиции для движущихся платформ
-                if (platform.classList.contains('moving-left') || platform.classList.contains('moving-right')) {
-                    platformLeft = parseInt(getComputedStyle(platform).left);
-                }
 
                 if (
                     playerBottom <= platformBottom + 20 &&
