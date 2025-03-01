@@ -315,7 +315,7 @@
                 bonus.style.bottom = (newBottom + 20) + 'px';
                 game.appendChild(bonus);
                 newPlatform.dataset.bonusAdded = 'true';
-                console.log('Bonus spawned at:', bonus.style.left, bonus.style.bottom); // Отладка
+                console.log('Bonus spawned at:', bonus.style.left, bonus.style.bottom);
             }
 
             game.appendChild(newPlatform);
@@ -325,20 +325,24 @@
 
         function shiftPlatformsDown() {
             const platforms = document.querySelectorAll('.platform');
+            let maxBottom = 0;
             platforms.forEach(platform => {
                 let currentBottom = parseInt(platform.style.bottom);
                 currentBottom -= 100;
                 platform.style.bottom = currentBottom + 'px';
                 if (currentBottom < -20) {
-                    if (document.getElementById('bonus') && parseInt(document.getElementById('bonus').style.bottom) < -60) {
-                        document.getElementById('bonus')?.remove();
-                    }
                     platform.remove();
+                } else {
+                    maxBottom = Math.max(maxBottom, currentBottom);
                 }
             });
+            const bonus = document.getElementById('bonus');
+            if (bonus && parseInt(bonus.style.bottom) < -60) {
+                bonus.remove();
+            }
             const remainingPlatforms = document.querySelectorAll('.platform');
             if (remainingPlatforms.length > 0) {
-                highestPlatformBottom = Math.max(...Array.from(remainingPlatforms).map(p => parseInt(p.style.bottom)));
+                highestPlatformBottom = maxBottom;
             } else {
                 highestPlatformBottom = 0;
             }
@@ -420,9 +424,11 @@
                 currentScoreDisplay.textContent = currentScore;
             }
 
+            // Корректировка камеры
             if (playerBottom >= 400) {
                 shiftPlatformsDown();
-                playerBottom -= 100;
+                // Смещаем только платформы, оставляем игрока на месте
+                playerBottom = Math.max(0, playerBottom - 100); // Ограничиваем минимальную высоту
             }
 
             while (highestPlatformBottom < 600) {
