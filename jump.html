@@ -136,7 +136,7 @@
             width: 40px;
             height: 60px;
             position: absolute;
-            top: 0; /* Смещение относительно платформы */
+            top: -40px; /* Смещение вниз, чтобы бонус был на платформе */
             left: 30px; /* Смещение от центра платформы */
             background: url('https://github.com/LemonSlice2/GangRum/blob/main/rubashka.png?raw=true') no-repeat center;
             background-size: contain;
@@ -314,7 +314,7 @@
                 const bonus = document.createElement('div');
                 bonus.id = 'bonus';
                 bonus.style.position = 'absolute';
-                bonus.style.top = '0'; // Относительно платформы
+                bonus.style.top = '-40px'; // Смещение вниз, чтобы бонус был на платформе
                 bonus.style.left = '30px'; // Смещение от центра
                 bonus.style.background = `url('https://github.com/LemonSlice2/GangRum/blob/main/rubashka.png?raw=true') no-repeat center`;
                 bonus.style.backgroundSize = 'contain';
@@ -352,7 +352,7 @@
         }
 
         function updateHighScore() {
-            if (currentScore > highScore) {
+            if(currentScore > highScore) {
                 highScore = currentScore;
                 highScoreDisplay.textContent = highScore;
                 localStorage.setItem('highScore', highScore);
