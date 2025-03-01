@@ -175,7 +175,7 @@
         let horizontalVelocity = 0;
         let isJumping = false;
         const gravity = 0.5;
-        let jumpForce = 12; // Базовая сила прыжка
+        let jumpForce = 12;
         const moveSpeed = 5;
         let highestPlatformBottom = 300;
         let currentScore = 0;
@@ -198,34 +198,41 @@
             if ((e.code === 'Space' || e.code === 'ArrowUp') && !isJumping) jump();
             if (e.code === 'ArrowLeft') horizontalVelocity = -moveSpeed;
             if (e.code === 'ArrowRight') horizontalVelocity = moveSpeed;
+            console.log('Key pressed:', e.code, horizontalVelocity, velocity); // Отладка
         });
 
         game.addEventListener('keyup', (e) => {
             e.preventDefault();
             if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') horizontalVelocity = 0;
+            console.log('Key released:', e.code, horizontalVelocity); // Отладка
         });
 
         leftBtn.addEventListener('mousedown', () => {
             horizontalVelocity = -moveSpeed;
             leftBtn.classList.add('active');
+            console.log('Left button pressed:', horizontalVelocity); // Отладка
         });
         leftBtn.addEventListener('mouseup', () => {
             horizontalVelocity = 0;
             leftBtn.classList.remove('active');
+            console.log('Left button released:', horizontalVelocity); // Отладка
         });
 
         rightBtn.addEventListener('mousedown', () => {
             horizontalVelocity = moveSpeed;
             rightBtn.classList.add('active');
+            console.log('Right button pressed:', horizontalVelocity); // Отладка
         });
         rightBtn.addEventListener('mouseup', () => {
             horizontalVelocity = 0;
             rightBtn.classList.remove('active');
+            console.log('Right button released:', horizontalVelocity); // Отладка
         });
 
         jumpBtn.addEventListener('mousedown', () => {
             if (!isJumping) jump();
             jumpBtn.classList.add('active');
+            console.log('Jump button pressed:', isJumping, velocity); // Отладка
         });
         jumpBtn.addEventListener('mouseup', () => {
             jumpBtn.classList.remove('active');
@@ -234,24 +241,29 @@
         leftBtn.addEventListener('touchstart', () => {
             horizontalVelocity = -moveSpeed;
             leftBtn.classList.add('active');
+            console.log('Left touch start:', horizontalVelocity); // Отладка
         });
         leftBtn.addEventListener('touchend', () => {
             horizontalVelocity = 0;
             leftBtn.classList.remove('active');
+            console.log('Left touch end:', horizontalVelocity); // Отладка
         });
 
         rightBtn.addEventListener('touchstart', () => {
             horizontalVelocity = moveSpeed;
             rightBtn.classList.add('active');
+            console.log('Right touch start:', horizontalVelocity); // Отладка
         });
         rightBtn.addEventListener('touchend', () => {
             horizontalVelocity = 0;
             rightBtn.classList.remove('active');
+            console.log('Right touch end:', horizontalVelocity); // Отладка
         });
 
         jumpBtn.addEventListener('touchstart', () => {
             if (!isJumping) jump();
             jumpBtn.classList.add('active');
+            console.log('Jump touch start:', isJumping, velocity); // Отладка
         });
         jumpBtn.addEventListener('touchend', () => {
             jumpBtn.classList.remove('active');
@@ -260,8 +272,9 @@
         function jump() {
             if (!isJumping) {
                 isJumping = true;
-                velocity = bonusActive ? jumpForce * 2 : jumpForce; // Удваиваем прыжок с бонусом
+                velocity = bonusActive ? jumpForce * 2 : jumpForce;
                 player.classList.add('jumping');
+                console.log('Jump triggered:', velocity); // Отладка
             }
         }
 
@@ -276,12 +289,12 @@
             newPlatform.classList.add('platform');
             const randomX = Math.floor(Math.random() * (game.offsetWidth - 100));
             const newBottom = highestPlatformBottom + 100;
-            const newLevel = parseInt(document.querySelector('.platform:last-child').dataset.level) + 1;
+            const newLevel = parseInt(document.querySelector('.platform:last-child').dataset.level) + 1 || 1; // Устойчивость на старте
             newPlatform.style.left = randomX + 'px';
             newPlatform.style.bottom = newBottom + 'px';
             newPlatform.dataset.level = newLevel;
             newPlatform.dataset.counted = 'false';
-            newPlatform.dataset.bonus-added = 'false'; // Флаг для бонуса
+            newPlatform.dataset.bonus-added = 'false';
 
             newPlatform.style.background = getPlatformColor(newLevel);
 
@@ -298,8 +311,8 @@
             if (Math.random() < 0.3 && newPlatform.dataset.bonus-added === 'false') {
                 const bonus = document.createElement('div');
                 bonus.id = 'bonus';
-                bonus.style.left = (randomX + 30) + 'px'; // Смещаем бонус чуть правее центра платформы
-                bonus.style.bottom = (newBottom + 20) + 'px'; // Над платформой
+                bonus.style.left = (randomX + 30) + 'px';
+                bonus.style.bottom = (newBottom + 20) + 'px';
                 game.appendChild(bonus);
                 newPlatform.dataset.bonus-added = 'true';
             }
@@ -317,17 +330,17 @@
                 platform.style.bottom = currentBottom + 'px';
                 if (currentBottom < -20) {
                     if (document.getElementById('bonus') && parseInt(document.getElementById('bonus').style.bottom) < -60) {
-                        document.getElementById('bonus').remove();
+                        document.getElementById('bonus')?.remove();
                     }
                     platform.remove();
                 }
             });
-            setTimeout(() => {
-                const remainingPlatforms = document.querySelectorAll('.platform');
-                if (remainingPlatforms.length > 0) {
-                    highestPlatformBottom = Math.max(...Array.from(remainingPlatforms).map(p => parseInt(p.style.bottom)));
-                }
-            }, 500);
+            const remainingPlatforms = document.querySelectorAll('.platform');
+            if (remainingPlatforms.length > 0) {
+                highestPlatformBottom = Math.max(...Array.from(remainingPlatforms).map(p => parseInt(p.style.bottom)));
+            } else {
+                highestPlatformBottom = 0; // Сброс, если платформы закончились
+            }
         }
 
         function updateHighScore() {
@@ -413,6 +426,10 @@
 
             while (highestPlatformBottom < 600) {
                 addNewPlatform();
+            }
+
+            if (onPlatform && velocity === 0) {
+                player.classList.remove('jumping'); // Убираем анимацию при приземлении
             }
 
             player.style.bottom = playerBottom + 'px';
