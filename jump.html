@@ -25,7 +25,8 @@
         #game {
             width: 400px;
             height: 600px;
-            background: #87CEEB;
+            background: url('https://github.com/LemonSlice2/GangRum/blob/main/e1913fab-ec3f-43cc-8e10-f27460cc7de0.png?raw=true') no-repeat center center;
+            background-size: cover;
             position: absolute;
             top: 0;
             left: 0;
@@ -96,23 +97,23 @@
             transform: translateX(-50%);
             display: flex;
             justify-content: space-between;
-            width: 220px; /* Увеличил с 200px до 220px для большего расстояния */
+            width: 220px;
             z-index: 10;
         }
 
         .control-btn {
             width: 60px;
             height: 60px;
-            border: 2px solid rgba(255, 255, 255, 0.3); /* Белые границы */
+            border: 2px solid rgba(255, 255, 255, 0.3);
             cursor: pointer;
             user-select: none;
             touch-action: manipulation;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Объёмность */
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
         }
 
         .control-btn.active {
-            opacity: 0.7; /* Эффект нажатия */
-            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Уменьшенная тень при нажатии */
+            opacity: 0.7;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
