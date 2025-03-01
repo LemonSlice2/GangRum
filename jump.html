@@ -221,7 +221,7 @@
             stick.style.transform = `translate(${dx}px, ${dy}px)`;
 
             // Только боковое движение
-            if (Math.abs(dx) > 10) {
+            if (Math.abs(dx) > 5) { // Уменьшил порог для чувствительности
                 horizontalVelocity = dx > 0 ? moveSpeed : -moveSpeed;
             } else {
                 horizontalVelocity = 0;
@@ -307,7 +307,7 @@
         function gameLoop() {
             velocity -= gravity;
             playerBottom += velocity;
-            playerLeft += horizontalVelocity;
+            playerLeft += horizontalVelocity; // Обновляем движение в gameLoop
 
             if (playerLeft <= 0) playerLeft = 0;
             if (playerLeft >= game.offsetWidth - 40) playerLeft = game.offsetWidth - 40;
