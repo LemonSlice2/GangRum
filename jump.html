@@ -192,7 +192,7 @@
 
         joystick.addEventListener('touchend', () => {
             horizontalVelocity = 0;
-            isJumping = false;
+            isJumping = false; // Сбрасываем состояние прыжка
             stick.style.transform = 'translate(0px, 0px)';
             stickX = 0;
             stickY = 0;
@@ -226,7 +226,7 @@
             }
 
             // Управление прыжком
-            if (dy < -10 && !isJumping) {
+            if (Math.abs(dy) < -10 && !isJumping) { // Прыжок активируется при движении вверх
                 jump();
             }
         }
