@@ -36,17 +36,17 @@
         }
         
         #player {
-            width: 40px; /* Сохраняем ширину, чтобы не "сплющивать" */
-            height: 60px; /* Увеличиваем высоту для пропорций */
+            width: 40px;
+            height: 60px;
             position: absolute;
             left: 180px;
             bottom: 0;
             transition: bottom 0.1s, left 0.1s;
-            object-fit: contain; /* Сохраняем пропорции изображения */
+            object-fit: contain;
         }
 
         #player.jumping {
-            animation: spin 0.5s linear infinite;
+            animation: spin 0.5s linear; /* Убрал infinite, анимация только во время прыжка */
         }
 
         @keyframes spin {
@@ -85,10 +85,9 @@
             top: 10px;
             left: 10px;
             z-index: 10;
-            background: #ADD8E6; /* Мягкий голубой фон */
             padding: 5px;
             border-radius: 5px;
-            width: 180px; /* Увеличил ширину для одной строки */
+            width: 180px; /* Оставил ширину */
             text-align: center;
         }
 
@@ -96,6 +95,8 @@
             color: black;
             font-family: Arial, sans-serif;
             font-size: 16px;
+            font-weight: bold; /* Сделал шрифт толще */
+            text-shadow: 1px 1px 2px white; /* Белая подсветка */
             margin: 0;
             padding: 5px;
             background: url('https://github.com/LemonSlice2/GangRum/blob/main/gold-profile-banner-trim.png?raw=true') no-repeat;
@@ -321,7 +322,7 @@
 
             let onPlatform = false;
 
-            const platforms = document.queryselectorAll('.platform');
+            const platforms = document.querySelectorAll('.platform');
             platforms.forEach(platform => {
                 let platformBottom = parseInt(platform.style.bottom);
                 let platformLeft = parseInt(getComputedStyle(platform).left); // Реальная позиция
