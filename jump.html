@@ -13,6 +13,7 @@
             min-height: 100vh;
             background: #f0f0f0;
             position: relative;
+            touch-action: none; /* Отключаем стандартные действия сенсора */
         }
         
         #game-container {
@@ -99,23 +100,46 @@
             z-index: 10;
         }
 
-        .control-btn {
-            width: 60px;
-            height: 60px;
-            background: #333;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            user-select: none;
-            touch-action: manipulation;
+        .joystick {
+            width: 100px;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            position: relative;
+            touch-action: none;
         }
 
-        .control-btn.active {
+        .joystick .stick {
+            width: 50px;
+            height: 50px;
             background: #555;
+            border-radius: 50%;
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            touch-action: none;
+            transition: transform 0.1s;
+        }
+
+        .jump-joystick {
+            width: 100px;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            position: relative;
+            touch-action: none;
+        }
+
+        .jump-stick {
+            width: 50px;
+            height: 50px;
+            background: #555;
+            border-radius: 50%;
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            touch-action: none;
+            transition: transform 0.1s;
         }
     </style>
 </head>
@@ -132,9 +156,12 @@
             <div class="platform visible" style="bottom: 300px; left: 250px;" data-level="3"></div>
         </div>
         <div id="controls">
-            <div class="control-btn" id="left-btn">←</div>
-            <div class="control-btn" id="jump-btn">↑</div>
-            <div class="control-btn" id="right-btn">→</div>
+            <div class="joystick" id="move-joystick">
+                <div class="stick" id="move-stick"></div>
+            </div>
+            <div class="jump-joystick" id="jump-joystick">
+                <div class="jump-stick" id="jump-stick"></div>
+            </div>
         </div>
     </div>
 
@@ -143,9 +170,10 @@
         const player = document.getElementById('player');
         const currentScoreDisplay = document.getElementById('current-score');
         const highScoreDisplay = document.getElementById('high-score');
-        const leftBtn = document.getElementById('left-btn');
-        const rightBtn = document.getElementById('right-btn');
-        const jumpBtn = document.getElementById('jump-btn');
+        const moveJoystick = document.getElementById('move-joystick');
+        const moveStick = document.getElementById('move-stick');
+        const jumpJoystick = document.getElementById('jump-joystick');
+        const jumpStick = document.getElementById('jump-stick');
         let playerBottom = 0;
         let playerLeft = 180;
         let velocity = 0;
@@ -168,81 +196,104 @@
         window.addEventListener('load', () => game.focus());
         game.addEventListener('click', () => game.focus());
 
-        game.addEventListener('keydown', (e) => {
+        // Джойстик для движения
+        let moveTouchStartX = 0;
+        let moveTouchStartY = 0;
+        let moveStickX = 0;
+        let moveStickY = 0;
+
+        moveJoystick.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            if ((e.code === 'Space' || e.code === 'ArrowUp') && !isJumping) {
+            const touch = e.touches[0];
+            moveTouchStartX = touch.clientX - moveJoystick.getBoundingClientRect().left - 50;
+            moveTouchStartY = touch.clientY - moveJoystick.getBoundingClientRect().top - 50;
+            updateMoveJoystick(touch);
+        });
+
+        moveJoystick.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            updateMoveJoystick(touch);
+        });
+
+        moveJoystick.addEventListener('touchend', () => {
+            horizontalVelocity = 0;
+            moveStick.style.transform = 'translate(0px, 0px)';
+            moveStickX = 0;
+            moveStickY = 0;
+        });
+
+        function updateMoveJoystick(touch) {
+            const joystickRect = moveJoystick.getBoundingClientRect();
+            const stickRect = moveStick.getBoundingClientRect();
+            const touchX = touch.clientX - joystickRect.left - 50;
+            const touchY = touch.clientY - joystickRect.top - 50;
+
+            let dx = touchX - moveTouchStartX;
+            let dy = touchY - moveTouchStartY;
+
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const maxDistance = 50;
+            if (distance > maxDistance) {
+                const angle = Math.atan2(dy, dx);
+                dx = Math.cos(angle) * maxDistance;
+                dy = Math.sin(angle) * maxDistance;
+            }
+
+            moveStickX = dx;
+            moveStickY = dy;
+            moveStick.style.transform = `translate(${dx}px, ${dy}px)`;
+
+            // Определяем движение
+            if (Math.abs(dx) > 10) {
+                horizontalVelocity = dx > 0 ? moveSpeed : -moveSpeed;
+            } else {
+                horizontalVelocity = 0;
+            }
+        }
+
+        // Джойстик для прыжка
+        let jumpTouchStartY = 0;
+        let jumpStickY = 0;
+
+        jumpJoystick.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            jumpTouchStartY = touch.clientY - jumpJoystick.getBoundingClientRect().top - 50;
+            updateJumpJoystick(touch);
+        });
+
+        jumpJoystick.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            updateJumpJoystick(touch);
+        });
+
+        jumpJoystick.addEventListener('touchend', () => {
+            jumpStick.style.transform = 'translate(0px, 0px)';
+            jumpStickY = 0;
+        });
+
+        function updateJumpJoystick(touch) {
+            const joystickRect = jumpJoystick.getBoundingClientRect();
+            const stickRect = jumpStick.getBoundingClientRect();
+            const touchY = touch.clientY - joystickRect.top - 50;
+
+            let dy = touchY - jumpTouchStartY;
+            const maxDistance = 50;
+            if (Math.abs(dy) > maxDistance) {
+                dy = dy > 0 ? maxDistance : -maxDistance;
+            }
+
+            jumpStickY = dy;
+            jumpStick.style.transform = `translate(0px, ${dy}px)`;
+
+            if (dy < -10 && !isJumping) {
                 jump();
             }
-            if (e.code === 'ArrowLeft') {
-                horizontalVelocity = -moveSpeed;
-                leftBtn.classList.add('active');
-            }
-            if (e.code === 'ArrowRight') {
-                horizontalVelocity = moveSpeed;
-                rightBtn.classList.add('active');
-            }
-        });
-
-        game.addEventListener('keyup', (e) => {
-            e.preventDefault();
-            if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-                horizontalVelocity = 0;
-                leftBtn.classList.remove('active');
-                rightBtn.classList.remove('active');
-            }
-        });
-
-        function handleButtonStart(btn, action) {
-            btn.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                btn.classList.add('active');
-                action();
-                game.focus();
-            });
-            btn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                btn.classList.add('active');
-                action();
-                game.focus();
-            });
         }
 
-        function handleButtonEnd(btn, action) {
-            btn.addEventListener('mouseup', () => {
-                btn.classList.remove('active');
-                action();
-            });
-            btn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                btn.classList.remove('active');
-                action();
-            });
-            btn.addEventListener('touchcancel', (e) => {
-                e.preventDefault();
-                btn.classList.remove('active');
-                action();
-            });
-        }
-
-        handleButtonStart(leftBtn, () => horizontalVelocity = -moveSpeed);
-        handleButtonEnd(leftBtn, () => horizontalVelocity = 0);
-
-        handleButtonStart(rightBtn, () => horizontalVelocity = moveSpeed);
-        handleButtonEnd(rightBtn, () => horizontalVelocity = 0);
-
-        handleButtonStart(jumpBtn, () => { if (!isJumping) jump(); });
-        handleButtonEnd(jumpBtn, () => {});
-
-        function jump() {
-            if (!isJumping) {
-                isJumping = true;
-                velocity = jumpForce;
-                player.classList.add('jumping');
-                jumpBtn.classList.add('active');
-                setTimeout(() => jumpBtn.classList.remove('active'), 100);
-            }
-        }
-
+        // Логика игры
         function getPlatformColor(level) {
             const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'];
             const colorIndex = Math.floor((level - 1) / 15) % colors.length;
@@ -313,21 +364,23 @@
             const platforms = document.querySelectorAll('.platform');
             platforms.forEach(platform => {
                 let platformBottom = parseInt(platform.style.bottom);
-                let platformLeft = parseInt(platform.style.left); // Используем начальную позицию
+                let platformLeft = parseInt(platform.style.left); // Начальная позиция
                 const playerWidth = 40;
                 const platformWidth = 100;
 
-                // Проверка коллизии с учётом движения платформы
+                // Проверка текущей позиции для движущихся платформ
+                if (platform.classList.contains('moving-left') || platform.classList.contains('moving-right')) {
+                    platformLeft = parseInt(getComputedStyle(platform).left);
+                }
+
                 if (
                     playerBottom <= platformBottom + 20 &&
                     playerBottom + velocity >= platformBottom &&
                     velocity < 0
                 ) {
-                    // Расширяем зону коллизии для движущихся платформ
-                    let currentPlatformLeft = parseInt(getComputedStyle(platform).left);
                     if (
-                        playerLeft + playerWidth > currentPlatformLeft &&
-                        playerLeft < currentPlatformLeft + platformWidth
+                        playerLeft + playerWidth > platformLeft &&
+                        playerLeft < platformLeft + platformWidth
                     ) {
                         playerBottom = platformBottom + 20;
                         velocity = 0;
