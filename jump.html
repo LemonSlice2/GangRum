@@ -131,6 +131,14 @@
             opacity: 0.7;
             box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
         }
+
+        #bonus {
+            width: 40px;
+            height: 60px;
+            position: absolute;
+            background: url('https://github.com/LemonSlice2/GangRum/blob/main/rubashka.png?raw=true') no-repeat center;
+            background-size: contain;
+        }
     </style>
 </head>
 <body>
@@ -142,9 +150,9 @@
                     Счет: <span id="current-score">0</span> Рекорд: <span id="high-score">0</span>
                 </div>
             </div>
-            <div class="platform visible" style="bottom: 100px; left: 150px;" data-level="1"></div>
-            <div class="platform visible" style="bottom: 200px; left: 50px;" data-level="2"></div>
-            <div class="platform visible" style="bottom: 300px; left: 250px;" data-level="3"></div>
+            <div class="platform visible" style="bottom: 100px; left: 150px;" data-level="1" data-bonus-added="false"></div>
+            <div class="platform visible" style="bottom: 200px; left: 50px;" data-level="2" data-bonus-added="false"></div>
+            <div class="platform visible" style="bottom: 300px; left: 250px;" data-level="3" data-bonus-added="false"></div>
         </div>
         <div id="controls">
             <img src="https://github.com/LemonSlice2/GangRum/blob/main/влево.png?raw=true" id="left-btn" class="control-btn">
@@ -167,11 +175,13 @@
         let horizontalVelocity = 0;
         let isJumping = false;
         const gravity = 0.5;
-        const jumpForce = 12;
+        let jumpForce = 12;
         const moveSpeed = 5;
         let highestPlatformBottom = 300;
         let currentScore = 0;
         let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
+        let bonusActive = false;
+        let bonusTimeout = null;
 
         highScoreDisplay.textContent = highScore;
 
@@ -262,7 +272,7 @@
         function jump() {
             if (!isJumping) {
                 isJumping = true;
-                velocity = jumpForce;
+                velocity = bonusActive ? jumpForce * 2 : jumpForce;
                 player.classList.add('jumping');
                 console.log('Jump triggered:', velocity);
             }
@@ -284,6 +294,7 @@
             newPlatform.style.bottom = newBottom + 'px';
             newPlatform.dataset.level = newLevel;
             newPlatform.dataset.counted = 'false';
+            newPlatform.dataset.bonus-added = 'false';
 
             newPlatform.style.background = getPlatformColor(newLevel);
 
@@ -294,6 +305,16 @@
                 } else {
                     if (Math.random() < 0.3) newPlatform.classList.add(moveDirection);
                 }
+            }
+
+            // Добавляем бонус с вероятностью 30%
+            if (Math.random() < 0.3 && newPlatform.dataset.bonus-added === 'false') {
+                const bonus = document.createElement('div');
+                bonus.id = 'bonus';
+                bonus.style.left = (randomX + 30) + 'px';
+                bonus.style.bottom = (newBottom + 20) + 'px';
+                game.appendChild(bonus);
+                newPlatform.dataset.bonus-added = 'true';
             }
 
             game.appendChild(newPlatform);
@@ -308,6 +329,9 @@
                 currentBottom -= 100;
                 platform.style.bottom = currentBottom + 'px';
                 if (currentBottom < -20) {
+                    if (document.getElementById('bonus') && parseInt(document.getElementById('bonus').style.bottom) < -60) {
+                        document.getElementById('bonus')?.remove();
+                    }
                     platform.remove();
                 }
             });
@@ -336,6 +360,7 @@
             if (playerLeft >= game.offsetWidth - 40) playerLeft = game.offsetWidth - 40;
 
             let onPlatform = false;
+            const bonus = document.getElementById('bonus');
 
             const platforms = document.querySelectorAll('.platform');
             platforms.forEach(platform => {
@@ -368,6 +393,22 @@
                     }
                 }
             });
+
+            // Проверка на сбор бонуса
+            if (bonus && playerBottom <= parseInt(bonus.style.bottom) + 60 &&
+                playerBottom + velocity >= parseInt(bonus.style.bottom) &&
+                playerLeft + 40 > parseInt(bonus.style.left) &&
+                playerLeft < parseInt(bonus.style.left) + 40) {
+                bonus.remove();
+                if (!bonusActive) {
+                    bonusActive = true;
+                    jumpForce = jumpForce * 2; // Удваиваем силу прыжка
+                    bonusTimeout = setTimeout(() => {
+                        bonusActive = false;
+                        jumpForce = 12; // Возвращаем базовую силу
+                    }, 3000); // 3 секунды
+                }
+            }
 
             if (playerBottom <= 0) {
                 playerBottom = 0;
