@@ -36,12 +36,13 @@
         }
         
         #player {
-            width: 40px;
-            height: 40px;
+            width: 40px; /* Сохраняем ширину, чтобы не "сплющивать" */
+            height: 60px; /* Увеличиваем высоту для пропорций */
             position: absolute;
             left: 180px;
             bottom: 0;
             transition: bottom 0.1s, left 0.1s;
+            object-fit: contain; /* Сохраняем пропорции изображения */
         }
 
         #player.jumping {
@@ -87,6 +88,8 @@
             background: #ADD8E6; /* Мягкий голубой фон */
             padding: 5px;
             border-radius: 5px;
+            width: 180px; /* Увеличил ширину для одной строки */
+            text-align: center;
         }
 
         #score-board {
@@ -98,6 +101,8 @@
             background: url('https://github.com/LemonSlice2/GangRum/blob/main/gold-profile-banner-trim.png?raw=true') no-repeat;
             background-size: contain;
             background-position: center;
+            display: inline-block;
+            white-space: nowrap; /* Счёт и рекорд на одной строке */
         }
 
         #controls {
@@ -133,8 +138,7 @@
             <img id="player" src="https://github.com/LemonSlice2/GangRum/blob/main/sticker.png?raw=true">
             <div id="score-board-container">
                 <div id="score-board">
-                    <div>Счет: <span id="current-score">0</span></div>
-                    <div>Рекорд: <span id="high-score">0</span></div>
+                    Счет: <span id="current-score">0</span> Рекорд: <span id="high-score">0</span>
                 </div>
             </div>
             <div class="platform visible" style="bottom: 100px; left: 150px;" data-level="1"></div>
@@ -317,7 +321,7 @@
 
             let onPlatform = false;
 
-            const platforms = document.querySelectorAll('.platform');
+            const platforms = document.queryselectorAll('.platform');
             platforms.forEach(platform => {
                 let platformBottom = parseInt(platform.style.bottom);
                 let platformLeft = parseInt(getComputedStyle(platform).left); // Реальная позиция
