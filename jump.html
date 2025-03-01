@@ -61,7 +61,6 @@
             position: absolute;
             transition: bottom 0.5s ease;
             opacity: 0;
-            position: relative; /* Для вложенного бонуса */
         }
         
         .platform.visible {
@@ -137,7 +136,7 @@
             width: 40px;
             height: 60px;
             position: absolute;
-            top: -40px; /* Над платформой */
+            top: 0; /* Смещение относительно платформы */
             left: 30px; /* Смещение от центра платформы */
             background: url('https://github.com/LemonSlice2/GangRum/blob/main/rubashka.png?raw=true') no-repeat center;
             background-size: contain;
@@ -315,9 +314,13 @@
                 const bonus = document.createElement('div');
                 bonus.id = 'bonus';
                 bonus.style.position = 'absolute';
-                bonus.style.top = '-40px'; // Над платформой
+                bonus.style.top = '0'; // Относительно платформы
                 bonus.style.left = '30px'; // Смещение от центра
-                newPlatform.appendChild(bonus); // Привязываем бонус к платформе
+                bonus.style.background = `url('https://github.com/LemonSlice2/GangRum/blob/main/rubashka.png?raw=true') no-repeat center`;
+                bonus.style.backgroundSize = 'contain';
+                bonus.style.width = '40px';
+                bonus.style.height = '60px';
+                newPlatform.appendChild(bonus);
                 newPlatform.dataset.bonusAdded = 'true';
                 console.log('Bonus spawned at platform:', newBottom, randomX);
             }
@@ -400,8 +403,8 @@
                 // Проверка бонуса на платформе
                 const bonus = platform.querySelector('#bonus');
                 if (bonus && !jumpBoostActive) {
-                    const bonusBottom = platformBottom + parseInt(bonus.style.top || 0);
-                    const bonusLeft = platformLeft + parseInt(bonus.style.left || 0);
+                    const bonusBottom = platformBottom + parseInt(getComputedStyle(bonus).top || 0);
+                    const bonusLeft = platformLeft + parseInt(getComputedStyle(bonus).left || 0);
                     if (
                         playerBottom <= bonusBottom + 60 &&
                         playerBottom + velocity >= bonusBottom &&
@@ -426,8 +429,7 @@
 
             if (playerBottom >= 400) {
                 shiftPlatformsDown();
-                // Смещаем только платформы, оставляем игрока
-                playerBottom = Math.max(0, playerBottom - 100);
+                playerBottom = Math.max(0, playerBottom - 100); // Смещаем игрока, но не уводим за камеру
             }
 
             while (highestPlatformBottom < 600) {
