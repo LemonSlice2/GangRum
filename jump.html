@@ -38,13 +38,12 @@
         #player {
             width: 40px;
             height: 40px;
-            background: red;
             position: absolute;
             left: 180px;
             bottom: 0;
             transition: bottom 0.1s, left 0.1s;
         }
-        
+
         #player.jumping {
             animation: spin 0.5s linear infinite;
         }
@@ -80,14 +79,25 @@
             to { left: calc(400px - 100px); }
         }
 
-        #score-board {
+        #score-board-container {
             position: absolute;
             top: 10px;
             left: 10px;
+            z-index: 10;
+            background: #ADD8E6; /* Мягкий голубой фон */
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        #score-board {
             color: black;
             font-family: Arial, sans-serif;
             font-size: 16px;
-            z-index: 10;
+            margin: 0;
+            padding: 5px;
+            background: url('https://github.com/LemonSlice2/GangRum/blob/main/gold-profile-banner-trim.png?raw=true') no-repeat;
+            background-size: contain;
+            background-position: center;
         }
 
         #controls {
@@ -120,10 +130,12 @@
 <body>
     <div id="game-container">
         <div id="game" tabindex="0">
-            <div id="player"></div>
-            <div id="score-board">
-                <div>Счет: <span id="current-score">0</span></div>
-                <div>Рекорд: <span id="high-score">0</span></div>
+            <img id="player" src="https://github.com/LemonSlice2/GangRum/blob/main/sticker.png?raw=true">
+            <div id="score-board-container">
+                <div id="score-board">
+                    <div>Счет: <span id="current-score">0</span></div>
+                    <div>Рекорд: <span id="high-score">0</span></div>
+                </div>
             </div>
             <div class="platform visible" style="bottom: 100px; left: 150px;" data-level="1"></div>
             <div class="platform visible" style="bottom: 200px; left: 50px;" data-level="2"></div>
