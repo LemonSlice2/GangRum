@@ -61,6 +61,7 @@
             position: absolute;
             transition: bottom 0.5s ease;
             opacity: 0;
+            position: relative; /* Для вложенного бонуса */
         }
         
         .platform.visible {
@@ -136,6 +137,8 @@
             width: 40px;
             height: 60px;
             position: absolute;
+            top: -40px; /* Над платформой */
+            left: 30px; /* Смещение от центра платформы */
             background: url('https://github.com/LemonSlice2/GangRum/blob/main/rubashka.png?raw=true') no-repeat center;
             background-size: contain;
         }
@@ -311,11 +314,12 @@
             if (Math.random() < 0.3 && newPlatform.dataset.bonusAdded === 'false') {
                 const bonus = document.createElement('div');
                 bonus.id = 'bonus';
-                bonus.style.left = (randomX + 30) + 'px';
-                bonus.style.bottom = (newBottom + 20) + 'px';
-                game.appendChild(bonus);
+                bonus.style.position = 'absolute';
+                bonus.style.top = '-40px'; // Над платформой
+                bonus.style.left = '30px'; // Смещение от центра
+                newPlatform.appendChild(bonus); // Привязываем бонус к платформе
                 newPlatform.dataset.bonusAdded = 'true';
-                console.log('Bonus spawned at:', bonus.style.left, bonus.style.bottom);
+                console.log('Bonus spawned at platform:', newBottom, randomX);
             }
 
             game.appendChild(newPlatform);
@@ -336,10 +340,6 @@
                     maxBottom = Math.max(maxBottom, currentBottom);
                 }
             });
-            const bonus = document.getElementById('bonus');
-            if (bonus && parseInt(bonus.style.bottom) < -60) {
-                bonus.remove();
-            }
             const remainingPlatforms = document.querySelectorAll('.platform');
             if (remainingPlatforms.length > 0) {
                 highestPlatformBottom = maxBottom;
@@ -365,7 +365,6 @@
             if (playerLeft >= game.offsetWidth - 40) playerLeft = game.offsetWidth - 40;
 
             let onPlatform = false;
-            const bonus = document.getElementById('bonus');
 
             const platforms = document.querySelectorAll('.platform');
             platforms.forEach(platform => {
@@ -397,23 +396,24 @@
                         }
                     }
                 }
-            });
 
-            // Сбор бонуса
-            if (bonus && !jumpBoostActive) {
-                const bonusBottom = parseInt(bonus.style.bottom);
-                const bonusLeft = parseInt(bonus.style.left);
-                if (
-                    playerBottom <= bonusBottom + 60 &&
-                    playerBottom + velocity >= bonusBottom &&
-                    playerLeft + 40 > bonusLeft &&
-                    playerLeft < bonusLeft + 40
-                ) {
-                    bonus.remove();
-                    applyJumpBoost();
-                    console.log('Bonus collected, boost active for 3s');
+                // Проверка бонуса на платформе
+                const bonus = platform.querySelector('#bonus');
+                if (bonus && !jumpBoostActive) {
+                    const bonusBottom = platformBottom + parseInt(bonus.style.top || 0);
+                    const bonusLeft = platformLeft + parseInt(bonus.style.left || 0);
+                    if (
+                        playerBottom <= bonusBottom + 60 &&
+                        playerBottom + velocity >= bonusBottom &&
+                        playerLeft + 40 > bonusLeft &&
+                        playerLeft < bonusLeft + 40
+                    ) {
+                        bonus.remove();
+                        applyJumpBoost();
+                        console.log('Bonus collected at:', platformBottom, platformLeft);
+                    }
                 }
-            }
+            });
 
             if (playerBottom <= 0) {
                 playerBottom = 0;
@@ -424,11 +424,10 @@
                 currentScoreDisplay.textContent = currentScore;
             }
 
-            // Корректировка камеры
             if (playerBottom >= 400) {
                 shiftPlatformsDown();
-                // Смещаем только платформы, оставляем игрока на месте
-                playerBottom = Math.max(0, playerBottom - 100); // Ограничиваем минимальную высоту
+                // Смещаем только платформы, оставляем игрока
+                playerBottom = Math.max(0, playerBottom - 100);
             }
 
             while (highestPlatformBottom < 600) {
