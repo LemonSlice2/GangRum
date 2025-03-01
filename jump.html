@@ -175,7 +175,7 @@
         let horizontalVelocity = 0;
         let isJumping = false;
         const gravity = 0.5;
-        const baseJumpForce = 12; // Базовая сила прыжка
+        const baseJumpForce = 12;
         const moveSpeed = 5;
         let highestPlatformBottom = 300;
         let currentScore = 0;
@@ -294,7 +294,7 @@
             newPlatform.style.bottom = newBottom + 'px';
             newPlatform.dataset.level = newLevel;
             newPlatform.dataset.counted = 'false';
-            newPlatform.dataset.bonusAdded = 'false'; // Используем camelCase для единообразия
+            newPlatform.dataset.bonusAdded = 'false';
 
             newPlatform.style.background = getPlatformColor(newLevel);
 
@@ -307,7 +307,7 @@
                 }
             }
 
-            // Добавляем бонус с вероятностью 30%
+            // Бонус с вероятностью 30%
             if (Math.random() < 0.3 && newPlatform.dataset.bonusAdded === 'false') {
                 const bonus = document.createElement('div');
                 bonus.id = 'bonus';
@@ -315,6 +315,7 @@
                 bonus.style.bottom = (newBottom + 20) + 'px';
                 game.appendChild(bonus);
                 newPlatform.dataset.bonusAdded = 'true';
+                console.log('Bonus spawned at:', bonus.style.left, bonus.style.bottom); // Отладка
             }
 
             game.appendChild(newPlatform);
@@ -339,7 +340,7 @@
             if (remainingPlatforms.length > 0) {
                 highestPlatformBottom = Math.max(...Array.from(remainingPlatforms).map(p => parseInt(p.style.bottom)));
             } else {
-                highestPlatformBottom = 0; // Сброс для новой генерации
+                highestPlatformBottom = 0;
             }
         }
 
@@ -394,7 +395,7 @@
                 }
             });
 
-            // Альтернативная логика сбора бонуса
+            // Сбор бонуса
             if (bonus && !jumpBoostActive) {
                 const bonusBottom = parseInt(bonus.style.bottom);
                 const bonusLeft = parseInt(bonus.style.left);
@@ -406,6 +407,7 @@
                 ) {
                     bonus.remove();
                     applyJumpBoost();
+                    console.log('Bonus collected, boost active for 3s');
                 }
             }
 
@@ -441,6 +443,7 @@
             jumpBoostActive = true;
             jumpBoostTimeout = setTimeout(() => {
                 jumpBoostActive = false;
+                console.log('Jump boost ended');
             }, 3000); // Буст на 3 секунды
         }
 
