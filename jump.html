@@ -175,13 +175,13 @@
         let horizontalVelocity = 0;
         let isJumping = false;
         const gravity = 0.5;
-        let jumpForce = 12;
+        const baseJumpForce = 12; // Базовая сила прыжка
         const moveSpeed = 5;
         let highestPlatformBottom = 300;
         let currentScore = 0;
         let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
-        let bonusActive = false;
-        let bonusTimeout = null;
+        let jumpBoostActive = false;
+        let jumpBoostTimeout = null;
 
         highScoreDisplay.textContent = highScore;
 
@@ -272,7 +272,7 @@
         function jump() {
             if (!isJumping) {
                 isJumping = true;
-                velocity = bonusActive ? jumpForce * 2 : jumpForce;
+                velocity = jumpBoostActive ? baseJumpForce * 2 : baseJumpForce;
                 player.classList.add('jumping');
                 console.log('Jump triggered:', velocity);
             }
@@ -294,7 +294,7 @@
             newPlatform.style.bottom = newBottom + 'px';
             newPlatform.dataset.level = newLevel;
             newPlatform.dataset.counted = 'false';
-            newPlatform.dataset.bonus-added = 'false';
+            newPlatform.dataset.bonusAdded = 'false'; // Используем camelCase для единообразия
 
             newPlatform.style.background = getPlatformColor(newLevel);
 
@@ -308,13 +308,13 @@
             }
 
             // Добавляем бонус с вероятностью 30%
-            if (Math.random() < 0.3 && newPlatform.dataset.bonus-added === 'false') {
+            if (Math.random() < 0.3 && newPlatform.dataset.bonusAdded === 'false') {
                 const bonus = document.createElement('div');
                 bonus.id = 'bonus';
                 bonus.style.left = (randomX + 30) + 'px';
                 bonus.style.bottom = (newBottom + 20) + 'px';
                 game.appendChild(bonus);
-                newPlatform.dataset.bonus-added = 'true';
+                newPlatform.dataset.bonusAdded = 'true';
             }
 
             game.appendChild(newPlatform);
@@ -339,7 +339,7 @@
             if (remainingPlatforms.length > 0) {
                 highestPlatformBottom = Math.max(...Array.from(remainingPlatforms).map(p => parseInt(p.style.bottom)));
             } else {
-                highestPlatformBottom = 0;
+                highestPlatformBottom = 0; // Сброс для новой генерации
             }
         }
 
@@ -394,19 +394,18 @@
                 }
             });
 
-            // Проверка на сбор бонуса
-            if (bonus && playerBottom <= parseInt(bonus.style.bottom) + 60 &&
-                playerBottom + velocity >= parseInt(bonus.style.bottom) &&
-                playerLeft + 40 > parseInt(bonus.style.left) &&
-                playerLeft < parseInt(bonus.style.left) + 40) {
-                bonus.remove();
-                if (!bonusActive) {
-                    bonusActive = true;
-                    jumpForce = jumpForce * 2; // Удваиваем силу прыжка
-                    bonusTimeout = setTimeout(() => {
-                        bonusActive = false;
-                        jumpForce = 12; // Возвращаем базовую силу
-                    }, 3000); // 3 секунды
+            // Альтернативная логика сбора бонуса
+            if (bonus && !jumpBoostActive) {
+                const bonusBottom = parseInt(bonus.style.bottom);
+                const bonusLeft = parseInt(bonus.style.left);
+                if (
+                    playerBottom <= bonusBottom + 60 &&
+                    playerBottom + velocity >= bonusBottom &&
+                    playerLeft + 40 > bonusLeft &&
+                    playerLeft < bonusLeft + 40
+                ) {
+                    bonus.remove();
+                    applyJumpBoost();
                 }
             }
 
@@ -436,6 +435,13 @@
             player.style.left = playerLeft + 'px';
 
             requestAnimationFrame(gameLoop);
+        }
+
+        function applyJumpBoost() {
+            jumpBoostActive = true;
+            jumpBoostTimeout = setTimeout(() => {
+                jumpBoostActive = false;
+            }, 3000); // Буст на 3 секунды
         }
 
         gameLoop();
