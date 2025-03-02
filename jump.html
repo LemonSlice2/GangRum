@@ -195,21 +195,21 @@
             z-index: 10;
         }
 
+        #tap-score {
+            margin-top: 50px; /* Вернули счёт выше */
+        }
+
         #tap-image {
-            width: 200px;
-            height: 200px;
+            width: 300px; /* Увеличил размер */
+            height: 300px;
             background: url('https://github.com/LemonSlice2/GangRum/blob/main/roma%20k.png?raw=true') no-repeat center;
             background-size: contain;
-            margin: 50px auto;
+            margin: 20px auto 0; /* Под счётом, по центру */
             transition: transform 0.1s;
         }
 
         #tap-image.clicked {
             transform: translateY(10px);
-        }
-
-        #tap-score {
-            margin-top: 20px;
         }
 
         #back-to-menu {
@@ -258,8 +258,8 @@
         <button id="back-to-menu" onclick="backToMenu()">Вернуться в меню</button>
     </div>
     <div id="tap-game">
-        <div id="tap-image"></div>
         <div id="tap-score">Счет: 0</div>
+        <div id="tap-image"></div>
         <button id="back-to-menu" onclick="backToMenu()">Вернуться в меню</button>
     </div>
 
@@ -504,7 +504,7 @@
 
             let onPlatform = false;
 
-            const platforms = document.queryselectorAll('.platform');
+            const platforms = document.querySelectorAll('.platform');
             platforms.forEach(platform => {
                 let platformBottom = parseInt(platform.style.bottom);
                 let platformLeft = parseInt(getComputedStyle(platform).left);
