@@ -193,11 +193,10 @@
             color: white;
             font-size: 24px;
             z-index: 10;
-            position: relative;
         }
 
         #tap-score {
-            margin-top: 50px; /* Счёт сверху */
+            margin-top: 50px; /* Счёт выше */
         }
 
         #tap-image {
@@ -210,7 +209,6 @@
             left: 50%;
             transform: translateX(-50%);
             transition: transform 0.1s;
-            z-index: 15; /* Выше остальных элементов */
         }
 
         #tap-image.clicked {
@@ -298,15 +296,15 @@
         <button id="back-to-menu" onclick="backToMenu()">Вернуться в меню</button>
     </div>
     <div id="tap-game">
-        <div id="tap-score">GangCoin: 0</div>
+        <div id="tap-score">GangKoin: 0</div>
         <div id="tap-image"></div>
         <button id="back-to-menu" onclick="backToMenu()">Вернуться в меню</button>
     </div>
     <div id="shop">
         <h2>Магазин</h2>
-        <div id="shop-coins">GangCoin: 0</div>
+        <div id="shop-coins">GangKoin: 0</div>
         <div id="shop-items">
-            <div class="shop-item" onclick="buyUpgrade(1)">Улучшение нажатия +1% (Уровень <span id="upgrade-level-1">1</span>) - 100 GangCoin</div>
+            <div class="shop-item" onclick="buyUpgrade(1)">Улучшение нажатия +1% - 100 GangKoin</div>
         </div>
         <button id="back-to-menu" onclick="backToMenu()">Вернуться в меню</button>
     </div>
@@ -325,7 +323,6 @@
         const tapImage = document.getElementById('tap-image');
         const tapScore = document.getElementById('tap-score');
         const shopCoins = document.getElementById('shop-coins');
-        const upgradeLevel1 = document.getElementById('upgrade-level-1');
         let playerBottom = 0;
         let playerLeft = 180;
         let velocity = 0;
@@ -341,12 +338,10 @@
         let jumpBoostActive = false;
         let jumpBoostTimeout = null;
         let tapMultiplier = localStorage.getItem('tapMultiplier') ? parseFloat(localStorage.getItem('tapMultiplier')) : 1;
-        let upgradeLevel = localStorage.getItem('upgradeLevel') ? parseInt(localStorage.getItem('upgradeLevel')) : 0;
 
         highScoreDisplay.textContent = highScore;
-        tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
-        shopCoins.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
-        upgradeLevel1.textContent = upgradeLevel + 1;
+        tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+        shopCoins.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
 
         function startGame(gameType) {
             menu.style.display = 'none';
@@ -355,7 +350,7 @@
                 gameLoop();
             } else if (gameType === 'gangTap') {
                 tapGame.style.display = 'block';
-                tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
+                tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
                 tapImage.addEventListener('click', handleTap);
             }
         }
@@ -363,8 +358,7 @@
         function openShop() {
             menu.style.display = 'none';
             shop.style.display = 'block';
-            shopCoins.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
-            upgradeLevel1.textContent = upgradeLevel + 1;
+            shopCoins.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
         }
 
         function backToMenu() {
@@ -381,28 +375,24 @@
             const baseGain = 1;
             const gainWithMultiplier = baseGain * tapMultiplier;
             tapGameCoin += gainWithMultiplier;
-            tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
+            tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
             tapImage.classList.add('clicked');
             setTimeout(() => tapImage.classList.remove('clicked'), 100);
             localStorage.setItem('tapHighCoin', tapGameCoin);
             localStorage.setItem('tapMultiplier', tapMultiplier);
-            localStorage.setItem('upgradeLevel', upgradeLevel);
         }
 
         function buyUpgrade(upgradeId) {
             if (upgradeId === 1 && tapGameCoin >= 100) {
                 tapGameCoin -= 100;
-                upgradeLevel++;
                 tapMultiplier *= 1.01;
-                tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
-                shopCoins.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
-                upgradeLevel1.textContent = upgradeLevel + 1;
+                tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+                shopCoins.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
                 localStorage.setItem('tapHighCoin', tapGameCoin);
                 localStorage.setItem('tapMultiplier', tapMultiplier);
-                localStorage.setItem('upgradeLevel', upgradeLevel);
-                alert('Улучшение куплено! Нажатие теперь даёт +1% GangCoin.');
+                alert('Улучшение куплено! Нажатие теперь даёт +1% GangKoin.');
             } else {
-                alert('Недостаточно GangCoin!');
+                alert('Недостаточно GangKoin!');
             }
         }
 
@@ -675,7 +665,7 @@
 
         function startTapGame() {
             tapGameCoin = localStorage.getItem('tapHighCoin') ? parseInt(localStorage.getItem('tapHighCoin')) : 0;
-            tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
+            tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
             tapImage.addEventListener('click', handleTap);
         }
 
@@ -683,36 +673,31 @@
             const baseGain = 1;
             const gainWithMultiplier = baseGain * tapMultiplier;
             tapGameCoin += gainWithMultiplier;
-            tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
+            tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
             tapImage.classList.add('clicked');
             setTimeout(() => tapImage.classList.remove('clicked'), 100);
             localStorage.setItem('tapHighCoin', tapGameCoin);
             localStorage.setItem('tapMultiplier', tapMultiplier);
-            localStorage.setItem('upgradeLevel', upgradeLevel);
         }
 
         function buyUpgrade(upgradeId) {
             if (upgradeId === 1 && tapGameCoin >= 100) {
                 tapGameCoin -= 100;
-                upgradeLevel++;
                 tapMultiplier *= 1.01;
-                tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
-                shopCoins.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
-                upgradeLevel1.textContent = upgradeLevel + 1;
+                tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+                shopCoins.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
                 localStorage.setItem('tapHighCoin', tapGameCoin);
                 localStorage.setItem('tapMultiplier', tapMultiplier);
-                localStorage.setItem('upgradeLevel', upgradeLevel);
-                alert('Улучшение куплено! Нажатие теперь даёт +1% GangCoin.');
+                alert('Улучшение куплено! Нажатие теперь даёт +1% GangKoin.');
             } else {
-                alert('Недостаточно GangCoin!');
+                alert('Недостаточно GangKoin!');
             }
         }
 
         function openShop() {
             menu.style.display = 'none';
             shop.style.display = 'block';
-            shopCoins.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
-            upgradeLevel1.textContent = upgradeLevel + 1;
+            shopCoins.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
         }
 
         function backToMenu() {
