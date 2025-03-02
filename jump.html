@@ -196,20 +196,23 @@
         }
 
         #tap-score {
-            margin-top: 50px; /* Вернули счёт выше */
+            margin-top: 50px; /* Счёт выше */
         }
 
         #tap-image {
-            width: 300px; /* Увеличил размер */
+            width: 300px; /* Оставил увеличенный размер */
             height: 300px;
             background: url('https://github.com/LemonSlice2/GangRum/blob/main/roma%20k.png?raw=true') no-repeat center;
             background-size: contain;
-            margin: 20px auto 0; /* Под счётом, по центру */
+            position: absolute;
+            top: 620px; /* Внизу, как кнопки в GangJump */
+            left: 50%;
+            transform: translateX(-50%);
             transition: transform 0.1s;
         }
 
         #tap-image.clicked {
-            transform: translateY(10px);
+            transform: translateY(10px) translateX(-50%);
         }
 
         #back-to-menu {
