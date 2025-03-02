@@ -186,9 +186,9 @@
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 400px;
-            height: 600px;
-            background: #87CEEB;
+            width: 100%;
+            height: 100%;
+            background: none; /* Убрал голубой фон */
             text-align: center;
             color: white;
             font-size: 24px;
@@ -197,6 +197,26 @@
 
         #tap-score {
             margin-top: 50px;
+        }
+
+        #back-to-menu {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        #back-to-menu:hover {
+            background-color: #555;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
@@ -223,9 +243,11 @@
             <img src="https://github.com/LemonSlice2/GangRum/blob/main/вверх.png?raw=true" id="jump-btn" class="control-btn">
             <img src="https://github.com/LemonSlice2/GangRum/blob/main/вправо.png?raw=true" id="right-btn" class="control-btn">
         </div>
+        <button id="back-to-menu" onclick="backToMenu()">Вернуться в меню</button>
     </div>
     <div id="tap-game">
         <div id="tap-score">Счет: 0</div>
+        <button id="back-to-menu" onclick="backToMenu()">Вернуться в меню</button>
     </div>
 
     <script>
@@ -246,7 +268,7 @@
         let isJumping = false;
         const gravity = 0.5;
         const baseJumpForce = 12;
-        const moveSpeed = 5; // Вернул стандартную скорость
+        const moveSpeed = 2; // Снизил скорость с 5 до 2
         let highestPlatformBottom = 300;
         let currentScore = 0;
         let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
@@ -264,7 +286,23 @@
                 gameLoop();
             } else if (gameType === 'tapGame') {
                 tapGame.style.display = 'block';
+                tapScore.textContent = `Счет: ${tapGameScore}`; // Обновляем счёт при старте
+                tapGame.addEventListener('click', handleTap); // Привязываем событие клика
             }
+        }
+
+        function backToMenu() {
+            gameContainer.style.display = 'none';
+            tapGame.style.display = 'none';
+            menu.style.display = 'block';
+            if (tapGameInterval) clearInterval(tapGameInterval); // Останавливаем таймер, если есть
+            tapGame.removeEventListener('click', handleTap); // Удаляем слушатель для тапалки
+        }
+
+        function handleTap() {
+            tapGameScore++;
+            tapScore.textContent = `Счет: ${tapGameScore}`;
+            localStorage.setItem('tapHighScore', tapGameScore); // Сохраняем очки
         }
 
         if (window.Telegram && window.Telegram.WebApp) {
@@ -411,7 +449,7 @@
         }
 
         function shiftPlatformsDown() {
-            const platforms = document.querySelectorAll('.platform');
+            const platforms = document.queryselectorAll('.platform');
             let maxBottom = 0;
             platforms.forEach(platform => {
                 let currentBottom = parseInt(platform.style.bottom);
@@ -537,11 +575,22 @@
         function startTapGame() {
             tapGameScore = localStorage.getItem('tapHighScore') ? parseInt(localStorage.getItem('tapHighScore')) : 0;
             tapScore.textContent = `Счет: ${tapGameScore}`;
-            tapGame.addEventListener('click', () => {
-                tapGameScore++;
-                tapScore.textContent = `Счет: ${tapGameScore}`;
-                localStorage.setItem('tapHighScore', tapGameScore); // Сохраняем очки
-            });
+            tapGame.addEventListener('click', handleTap);
+        }
+
+        function handleTap() {
+            tapGameScore++;
+            tapScore.textContent = `Счет: ${tapGameScore}`;
+            localStorage.setItem('tapHighScore', tapGameScore); // Сохраняем очки
+        }
+
+        function backToMenu() {
+            gameContainer.style.display = 'none';
+            tapGame.style.display = 'none';
+            menu.style.display = 'block';
+            if (tapGame.hasOwnProperty('click')) {
+                tapGame.removeEventListener('click', handleTap); // Удаляем слушатель для тапалки
+            }
         }
 
         gameLoop();
