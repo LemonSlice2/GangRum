@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Vertical Jump Game</title>
+    <title>Game Menu</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -14,12 +14,50 @@
             background: url('https://github.com/LemonSlice2/GangRum/blob/main/f57f04fa-3b2f-489c-82e7-5cf1ad7e9228.png?raw=true') no-repeat center center fixed;
             background-size: cover;
             position: relative;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
         }
-        
+
+        #menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 20;
+        }
+
+        #menu h1 {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            margin-bottom: 20px;
+        }
+
+        .menu-btn {
+            display: block;
+            width: 200px;
+            padding: 15px;
+            margin: 10px auto;
+            background-color: #333;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+        }
+
+        .menu-btn:hover {
+            background-color: #555;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
         #game-container {
             position: relative;
             width: 400px;
             height: 700px;
+            display: none; /* Скрыто по умолчанию */
         }
 
         #game {
@@ -136,14 +174,41 @@
             width: 40px;
             height: 60px;
             position: absolute;
-            top: -40px; /* Смещение вниз, чтобы бонус был на платформе */
-            left: 30px; /* Смещение от центра платформы */
+            top: -40px;
+            left: 30px;
             background: url('https://github.com/LemonSlice2/GangRum/blob/main/rubashka.png?raw=true') no-repeat center;
             background-size: contain;
+        }
+
+        #tap-game {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 400px;
+            height: 600px;
+            background: #87CEEB;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            z-index: 10;
+        }
+
+        #tap-score {
+            margin-top: 50px;
+        }
+
+        #tap-timer {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
+    <div id="menu">
+        <h1>Выбери игру</h1>
+        <button class="menu-btn" onclick="startGame('gangJump')">GangJump</button>
+        <button class="menu-btn" onclick="startGame('tapGame')">Tap Game</button>
+    </div>
     <div id="game-container">
         <div id="game" tabindex="0">
             <img id="player" src="https://github.com/LemonSlice2/GangRum/blob/main/sticker.png?raw=true">
@@ -162,15 +227,23 @@
             <img src="https://github.com/LemonSlice2/GangRum/blob/main/вправо.png?raw=true" id="right-btn" class="control-btn">
         </div>
     </div>
+    <div id="tap-game">
+        <div id="tap-score">Счет: 0</div>
+        <div id="tap-timer">Время: 30</div>
+    </div>
 
     <script>
-        const game = document.getElementById('game');
+        const menu = document.getElementById('menu');
+        const gameContainer = document.getElementById('game-container');
+        const tapGame = document.getElementById('tap-game');
         const player = document.getElementById('player');
         const currentScoreDisplay = document.getElementById('current-score');
         const highScoreDisplay = document.getElementById('high-score');
         const leftBtn = document.getElementById('left-btn');
         const rightBtn = document.getElementById('right-btn');
         const jumpBtn = document.getElementById('jump-btn');
+        const tapScore = document.getElementById('tap-score');
+        const tapTimer = document.getElementById('tap-timer');
         let playerBottom = 0;
         let playerLeft = 180;
         let velocity = 0;
@@ -184,8 +257,22 @@
         let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
         let jumpBoostActive = false;
         let jumpBoostTimeout = null;
+        let tapGameScore = 0;
+        let tapGameTime = 30;
+        let tapGameInterval = null;
 
         highScoreDisplay.textContent = highScore;
+
+        function startGame(gameType) {
+            menu.style.display = 'none';
+            if (gameType === 'gangJump') {
+                gameContainer.style.display = 'block';
+                gameLoop();
+            } else if (gameType === 'tapGame') {
+                tapGame.style.display = 'block';
+                startTapGame();
+            }
+        }
 
         if (window.Telegram && window.Telegram.WebApp) {
             Telegram.WebApp.ready();
@@ -314,8 +401,8 @@
                 const bonus = document.createElement('div');
                 bonus.id = 'bonus';
                 bonus.style.position = 'absolute';
-                bonus.style.top = '-40px'; // Смещение вниз, чтобы бонус был на платформе
-                bonus.style.left = '30px'; // Смещение от центра
+                bonus.style.top = '-40px'; // На платформе
+                bonus.style.left = '30px';
                 bonus.style.background = `url('https://github.com/LemonSlice2/GangRum/blob/main/rubashka.png?raw=true') no-repeat center`;
                 bonus.style.backgroundSize = 'contain';
                 bonus.style.width = '40px';
@@ -352,7 +439,7 @@
         }
 
         function updateHighScore() {
-            if(currentScore > highScore) {
+            if (currentScore > highScore) {
                 highScore = currentScore;
                 highScoreDisplay.textContent = highScore;
                 localStorage.setItem('highScore', highScore);
@@ -452,6 +539,28 @@
                 jumpBoostActive = false;
                 console.log('Jump boost ended');
             }, 3000); // Буст на 3 секунды
+        }
+
+        function startTapGame() {
+            tapGameScore = 0;
+            tapGameTime = 30;
+            tapScore.textContent = `Счет: ${tapGameScore}`;
+            tapTimer.textContent = `Время: ${tapGameTime}`;
+            tapGameInterval = setInterval(() => {
+                tapGameTime--;
+                tapTimer.textContent = `Время: ${tapGameTime}`;
+                if (tapGameTime <= 0) {
+                    clearInterval(tapGameInterval);
+                    alert(`Игра окончена! Ваш счет: ${tapGameScore}`);
+                    tapGame.style.display = 'none';
+                    menu.style.display = 'block';
+                }
+            }, 1000);
+
+            tapGame.addEventListener('click', () => {
+                tapGameScore++;
+                tapScore.textContent = `Счет: ${tapGameScore}`;
+            });
         }
 
         gameLoop();
