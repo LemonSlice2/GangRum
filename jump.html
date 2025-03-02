@@ -197,7 +197,7 @@
         }
 
         #tap-score {
-            margin-top: 50px;
+            margin-top: 50px; /* Счёт сверху */
         }
 
         #tap-image {
@@ -210,7 +210,7 @@
             left: 50%;
             transform: translateX(-50%);
             transition: transform 0.1s;
-            z-index: 15;
+            z-index: 15; /* Выше остальных элементов */
         }
 
         #tap-image.clicked {
@@ -253,7 +253,7 @@
         #back-to-menu {
             position: absolute;
             top: 10px;
-            right: 10px;
+            right: 10px; /* В правом верхнем углу */
             padding: 10px 20px;
             background-color: #333;
             color: white;
@@ -262,6 +262,7 @@
             font-size: 16px;
             cursor: pointer;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            z-index: 20; /* Чтоб не перекрывал тап */
         }
 
         #back-to-menu:hover {
