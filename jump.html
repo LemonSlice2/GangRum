@@ -197,7 +197,7 @@
         }
 
         #tap-score {
-            margin-top: 50px; /* Счёт выше */
+            margin-top: 50px;
         }
 
         #tap-image {
@@ -210,7 +210,7 @@
             left: 50%;
             transform: translateX(-50%);
             transition: transform 0.1s;
-            z-index: 15; /* Убедимся, что выше других элементов */
+            z-index: 15;
         }
 
         #tap-image.clicked {
@@ -382,7 +382,7 @@
             tapGameCoin += gainWithMultiplier;
             tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
             tapImage.classList.add('clicked');
-            setTimeout(() => tapImage.classList.remove('clicked'), 100); // Анимация нажатия
+            setTimeout(() => tapImage.classList.remove('clicked'), 100);
             localStorage.setItem('tapHighCoin', tapGameCoin);
             localStorage.setItem('tapMultiplier', tapMultiplier);
             localStorage.setItem('upgradeLevel', upgradeLevel);
@@ -509,7 +509,7 @@
             newPlatform.classList.add('platform');
             const randomX = Math.floor(Math.random() * (game.offsetWidth - 100));
             const newBottom = highestPlatformBottom + 100;
-            const newLevel = parseInt(document.querySelector('.platform:last-child')?.dataset.level) + 1 || 1;
+            const newLevel = parseInt(document.queryselector('.platform:last-child')?.dataset.level) + 1 || 1;
             newPlatform.style.left = randomX + 'px';
             newPlatform.style.bottom = newBottom + 'px';
             newPlatform.dataset.level = newLevel;
@@ -684,7 +684,7 @@
             tapGameCoin += gainWithMultiplier;
             tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
             tapImage.classList.add('clicked');
-            setTimeout(() => tapImage.classList.remove('clicked'), 100); // Анимация нажатия
+            setTimeout(() => tapImage.classList.remove('clicked'), 100);
             localStorage.setItem('tapHighCoin', tapGameCoin);
             localStorage.setItem('tapMultiplier', tapMultiplier);
             localStorage.setItem('upgradeLevel', upgradeLevel);
