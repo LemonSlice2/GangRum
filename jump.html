@@ -509,7 +509,7 @@
             newPlatform.classList.add('platform');
             const randomX = Math.floor(Math.random() * (game.offsetWidth - 100));
             const newBottom = highestPlatformBottom + 100;
-            const newLevel = parseInt(document.queryselector('.platform:last-child')?.dataset.level) + 1 || 1;
+            const newLevel = parseInt(document.querySelector('.platform:last-child')?.dataset.level) + 1 || 1;
             newPlatform.style.left = randomX + 'px';
             newPlatform.style.bottom = newBottom + 'px';
             newPlatform.dataset.level = newLevel;
