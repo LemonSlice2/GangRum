@@ -296,15 +296,15 @@
         <button id="back-to-menu" onclick="backToMenu()">Вернуться в меню</button>
     </div>
     <div id="tap-game">
-        <div id="tap-score">GangKoin: 0</div>
+        <div id="tap-score">GangCoin: 0</div> <!-- Изменён GangKoin на GangCoin -->
         <div id="tap-image"></div>
         <button id="back-to-menu" onclick="backToMenu()">Вернуться в меню</button>
     </div>
     <div id="shop">
         <h2>Магазин</h2>
-        <div id="shop-coins">GangKoin: 0</div>
+        <div id="shop-coins">GangCoin: 0</div> <!-- Изменён GangKoin на GangCoin -->
         <div id="shop-items">
-            <div class="shop-item" onclick="buyUpgrade(1)">Улучшение нажатия +1% - 100 GangKoin</div>
+            <div class="shop-item" onclick="buyUpgrade(1)">Улучшение нажатия +1% - 100 GangCoin (Текущая награда: <span id="current-reward">1</span> GangCoin)</div> <!-- Добавлена текущая награда -->
         </div>
         <button id="back-to-menu" onclick="backToMenu()">Вернуться в меню</button>
     </div>
@@ -323,6 +323,7 @@
         const tapImage = document.getElementById('tap-image');
         const tapScore = document.getElementById('tap-score');
         const shopCoins = document.getElementById('shop-coins');
+        const currentReward = document.getElementById('current-reward'); // Элемент для текущей награды
         let playerBottom = 0;
         let playerLeft = 180;
         let velocity = 0;
@@ -334,14 +335,15 @@
         let highestPlatformBottom = 300;
         let currentScore = 0;
         let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
-        let tapGameCoin = localStorage.getItem('tapHighCoin') ? parseInt(localStorage.getItem('tapHighCoin')) : 0;
+        let tapGameCoin = localStorage.getItem('tapHighCoin') ? parseInt(localStorage.getItem('tapHighCoin')) : 0; // Изменён tapGameKoin на tapGameCoin
         let jumpBoostActive = false;
         let jumpBoostTimeout = null;
         let tapMultiplier = localStorage.getItem('tapMultiplier') ? parseFloat(localStorage.getItem('tapMultiplier')) : 1;
 
         highScoreDisplay.textContent = highScore;
-        tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
-        shopCoins.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+        tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`; // Изменён GangKoin на GangCoin
+        shopCoins.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`; // Изменён GangKoin на GangCoin
+        currentReward.textContent = Math.floor(1 * tapMultiplier); // Инициализация текущей награды
 
         function startGame(gameType) {
             menu.style.display = 'none';
@@ -350,7 +352,8 @@
                 gameLoop();
             } else if (gameType === 'gangTap') {
                 tapGame.style.display = 'block';
-                tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+                tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`; // Изменён GangKoin на GangCoin
+                currentReward.textContent = Math.floor(1 * tapMultiplier); // Обновляем награду при входе
                 tapImage.addEventListener('click', handleTap);
             }
         }
@@ -358,7 +361,8 @@
         function openShop() {
             menu.style.display = 'none';
             shop.style.display = 'block';
-            shopCoins.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+            shopCoins.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`; // Изменён GangKoin на GangCoin
+            currentReward.textContent = Math.floor(1 * tapMultiplier); // Обновляем награду в магазине
         }
 
         function backToMenu() {
@@ -375,10 +379,10 @@
             const baseGain = 1;
             const gainWithMultiplier = baseGain * tapMultiplier;
             tapGameCoin += gainWithMultiplier;
-            tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+            tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`; // Изменён GangKoin на GangCoin
             tapImage.classList.add('clicked');
             setTimeout(() => tapImage.classList.remove('clicked'), 100);
-            localStorage.setItem('tapHighCoin', tapGameCoin);
+            localStorage.setItem('tapHighCoin', tapGameCoin); // Изменён tapHighKoin на tapHighCoin
             localStorage.setItem('tapMultiplier', tapMultiplier);
         }
 
@@ -386,13 +390,14 @@
             if (upgradeId === 1 && tapGameCoin >= 100) {
                 tapGameCoin -= 100;
                 tapMultiplier *= 1.01;
-                tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
-                shopCoins.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
-                localStorage.setItem('tapHighCoin', tapGameCoin);
+                tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`; // Изменён GangKoin на GangCoin
+                shopCoins.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`; // Изменён GangKoin на GangCoin
+                currentReward.textContent = Math.floor(1 * tapMultiplier); // Обновляем награду после покупки
+                localStorage.setItem('tapHighCoin', tapGameCoin); // Изменён tapHighKoin на tapHighCoin
                 localStorage.setItem('tapMultiplier', tapMultiplier);
-                alert('Улучшение куплено! Нажатие теперь даёт +1% GangKoin.');
+                alert('Улучшение куплено! Нажатие теперь даёт +1% GangCoin.'); // Изменён GangKoin на GangCoin
             } else {
-                alert('Недостаточно GangKoin!');
+                alert('Недостаточно GangCoin!'); // Изменён GangKoin на GangCoin
             }
         }
 
@@ -665,7 +670,7 @@
 
         function startTapGame() {
             tapGameCoin = localStorage.getItem('tapHighCoin') ? parseInt(localStorage.getItem('tapHighCoin')) : 0;
-            tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+            tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
             tapImage.addEventListener('click', handleTap);
         }
 
@@ -673,7 +678,7 @@
             const baseGain = 1;
             const gainWithMultiplier = baseGain * tapMultiplier;
             tapGameCoin += gainWithMultiplier;
-            tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+            tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
             tapImage.classList.add('clicked');
             setTimeout(() => tapImage.classList.remove('clicked'), 100);
             localStorage.setItem('tapHighCoin', tapGameCoin);
@@ -684,20 +689,22 @@
             if (upgradeId === 1 && tapGameCoin >= 100) {
                 tapGameCoin -= 100;
                 tapMultiplier *= 1.01;
-                tapScore.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
-                shopCoins.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+                tapScore.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
+                shopCoins.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
+                currentReward.textContent = Math.floor(1 * tapMultiplier);
                 localStorage.setItem('tapHighCoin', tapGameCoin);
                 localStorage.setItem('tapMultiplier', tapMultiplier);
-                alert('Улучшение куплено! Нажатие теперь даёт +1% GangKoin.');
+                alert('Улучшение куплено! Нажатие теперь даёт +1% GangCoin.');
             } else {
-                alert('Недостаточно GangKoin!');
+                alert('Недостаточно GangCoin!');
             }
         }
 
         function openShop() {
             menu.style.display = 'none';
             shop.style.display = 'block';
-            shopCoins.textContent = `GangKoin: ${Math.floor(tapGameCoin)}`;
+            shopCoins.textContent = `GangCoin: ${Math.floor(tapGameCoin)}`;
+            currentReward.textContent = Math.floor(1 * tapMultiplier);
         }
 
         function backToMenu() {
